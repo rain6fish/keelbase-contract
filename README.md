@@ -1,50 +1,72 @@
-# Protocol Specs / 协议语料与 wire Schema（CE-1）
+# KeelBase Contract / KeelBase 契约
 
-> 本目录承载「AI 治理协议」的**机器可校验语料**与 **wire 对象 Schema v1 冻结**——把 Proof Card / Evidence 文化从"留档"变"常绿门禁"（roadmap CE-1）。宿主 = TS 主仓；"载体可替换"是下游推论，不在此承诺任何 Java 载体。
-> Hosts the protocol's machine-checkable corpora and the wire-object Schema v1 freeze — making trust verifiable *every commit* (CE-1). Host = TS main repo; no third-party carrier is promised here.
+> 本仓是 KeelBase「AI 治理协议」的**机器可校验契约**：wire 对象 Schema、语言无关一致性向量，以及两者共用的一条版本线。
+> Hosts the KeelBase AI-governance protocol as a machine-checkable contract: the wire-object schemas, the language-neutral conformance vectors, and the single version line they share.
+
+**本仓不隶属于任何实现。** TS runtime 与 Java runtime 各自**平行**消费它——两者都只是消费者，**没有任何一个实现有权单方面改动它**。协议语义的源在本仓；实现跟随契约，而不是契约跟随某一个实现。
 
 ## 目录 / Layout
 
 ```
-specs/protocol/
-├── canonical-json-v1-vector.json    # §2.3 canonicalJSON 金样本（flat/nested/array/null/number/unicode 边界）
-├── audit-hash-v1-vector.json        # §2 hash / legacy 派生 / 链校验 / 篡改反例
-├── delegation-token-v1-vector.json  # §3 委托 token（相对时间构造 → 确定性、无时间戳）
-├── risk-level-v1-vector.json        # §4 风险分级派生 + RISK_STRATEGY 表
-├── governance-binding-v1-vector.json # §4.3/§4.4 策略→放行决策绑定 + deny 依据词表（CE-3 薄片）
-├── failure-semantics-v1-vector.json # 失败语义 wire 级绑定：失败词汇 → 承载 schema → 语料 FP（CE-3 薄片）
-├── wire-schema-registry.json        # wire 对象 Schema 冻结清单（对象 → schema($id) → 样例）
-├── schemas/v1/
-│   ├── *.schema.json                # v1 冻结形状（draft-07，$id 互引用）
-│   └── samples/*.json               # 每对象代表样例
-└── schemas/v2/ … schemas/vN/          # 语义升级后的新形状（先落新版本再改码）
-    ├── *.schema.json                # $id 只需**唯一**：**有跨文件相对 $ref 的 schema 必须用裸名**（带 `v<N>/` 前缀会把相对引用解析到不存在的目录下——先例 `confirmation-request` / `evidence-package` / `sse-event`）；无跨文件 ref 的才可用 `v<N>/` 前缀（如 `confirmation-decision`）
-    └── samples/*.json
+.
+├── canonical-json-v1-vector.json     # §2.3 canonicalJSON 金样本（flat/nested/array/null/number/unicode 边界）
+├── audit-hash-v1-vector.json         # §2 hash / legacy 派生 / 链校验 / 篡改反例
+├── delegation-token-v1-vector.json   # §3 委托 token（相对时间构造 → 确定性、无时间戳）
+├── risk-level-v1-vector.json         # §4 风险分级派生 + RISK_STRATEGY 表
+├── governance-binding-v1-vector.json # §4.3/§4.4 策略→放行决策绑定 + deny 依据词表
+├── failure-semantics-v1-vector.json  # 失败语义 wire 级绑定：失败词汇 → 承载 schema → 语料 FP
+├── confirmation-lifecycle-v1-vector.json   # 确认生命周期 v1（冻结留档）
+├── confirmation-lifecycle-v2-vector.json   # 确认生命周期 v2（当前）
+├── wire-schema-registry.json         # wire 对象冻结清单（对象 → schema → 样例）+ schemasDir
+├── schemas/
+│   ├── v1/ … vN/                     # 按版本分层的 wire 形状（draft-07，$id 互引用）
+│   └── …/samples/*.json              # 每对象代表样例
+├── runner/                           # 语言中性合规 runner（见 runner/README.md）
+└── CHANGELOG.md
 ```
-> 版本现状（**以 registry 为准，本行易腐**）：**v2** = `ai-audit-log-row` / `audit-payload` / `confirm-decision-body` / `confirmation-decision` / `evidence-package` / `sse-event`；**v3** = `confirmation-request` / `side-effect-revoke`。v1 保留为冻结历史。查权威版本用 `wire-schema-registry.json` 的 `objects[].version`。
 
-## 用法 / Usage（`cd Server-NestJS`）
+> ⚠ **`schemas/` 的目录名本身是契约的一部分**：`wire-schema-registry.json` 的 `schemasDir` 指向它。改名即改契约内容。
+> 版本现状**以 registry 为准**（写在别处易腐）：查权威版本用 `wire-schema-registry.json` 的 `objects[].version`。
 
-| 目的 | 命令 |
+## 版本与演进 / Versioning
+
+**加性规则（本仓的根本约束）：协议只增不改——新版本与旧版本并存；`v1.0.0` 之后，已发布的文件不得被重写或删除。**
+
+| 变更类型 | 含义 | 要求 |
+|---|---|---|
+| **MAJOR** | 破坏性：移除或重命名已发布文件，或改变已发布版本所承诺的语义 | **须 ADR**，且两个实现须同步 |
+| **MINOR** | 加性：新增文件——新 wire 对象、既有对象的新 schema 版本（`schemas/vN/`）、新向量 | 已发布文件**不改**；与实现同批落地 |
+| **PATCH** | 不改动任何**机器可校验内容**的补充（如本 README、CHANGELOG、`runner/`） | 已发布文件仍**不改** |
+
+> **为什么 PATCH 也不许改已发布文件**：已发布版本的文件一旦被重写，第三方按它复现出的结果就与历史对不上——
+> 而「第三方能按同一份语料复现」正是本仓存在的理由。要改，就升版本、并列新增。
+
+## 变更流程 / Change process
+
+- **变更一律在本仓内落地**，且**必须与向量 / schema 同批**（原子性）——契约与它的判定标准不分家。
+- **谁有权提**：任何实现都可以**提**；但**没有任何一个实现有权单方面落**。TS 与 Java 都只是消费者。
+  「实现先改、契约后补」正是本仓要消灭的模式。
+- **MAJOR 须 ADR**；**MINOR / PATCH** 只需向量与 schema 同批过常规评审。
+
+## 规则细节 / Rules
+
+- **单源**：语义变更必须先落本仓（升语料 / Schema 版本）再改实现；金样本由现实现生成（实证优先，不预设「正确答案」）。语料与 schema 文件名均含版本段、**不含时间戳**——确定性、可 diff。
+- **wire Schema = 固化当前形状**（人工策展快照，非自动派生）。**新增独立 wire 对象** → 加 `schemas/v1/` + registry 条目；**既有对象形状变更** → 先加 `schemas/vN/` 并更新 registry，再改实现。
+- **`$id` 取值规则**：**有跨文件相对 `$ref` 的 schema 必须用裸名**（带 `v<N>/` 前缀会把相对引用解析到不存在的目录下）；无跨文件 `$ref` 的才可用 `v<N>/` 前缀。
+- 来源锚见各 schema 的 `description` 与 registry 的 `source`（抽取时点行号，权威以实现源码为准）。
+
+## 第三方自认证 / Third-party self-cert
+
+声明兼容本协议的实现可用同一份语料复现：自身实现复算 §2.2 hash、§3 委托 token 验签、§4 风险派生、
+§4.3/§4.4 策略→放行决策绑定，与对应的 `*-v1-vector.json` 比对一致即视为通过。
+canonical 的嵌套边界语义以 `canonical-json-v1-vector.json` 为准。
+
+## 关联仓库 / Related repositories
+
+| 仓 | 角色 |
 |---|---|
-| 语料漂移检测（现实现重算 vs 已提交，diff 即红） | `node scripts/generate-protocol-vectors.mjs --check`（npm `protocol:vectors:check`） |
-| 语义变更后**重新生成**语料 | `node scripts/generate-protocol-vectors.mjs`（npm `protocol:vectors`） |
-| 语料驱动 conformance（canonical/hash/delegation/risk/治理绑定） | `npm run conformance` |
-| 生产 `AuditChainService` 复现 canonical 金样本 | `npm run test:protocol-corpus`（或 `test:wire-schema` 仅 wire） |
+| `rain6fish/KeelBase` | TS runtime（消费者） |
+| `rain6fish/KeelBase4J` | Java runtime（消费者） |
+| `rain6fish/KeelBase-java-starter` | Java 接入层，Spring Boot Starter |
 
-## CI / 门禁
-
-- `.github/workflows/ci.yml` `protocol-conformance` job：先 `generate-protocol-vectors.mjs --check`（金样本漂移），再 `verify-protocol-conformance.mjs`（语料驱动，篡改/断链/aud/过期/签名篡改必须拒）。
-- `test` job（jest）自动覆盖：`audit-chain.reproduce.spec.ts`（生产实现 = 金样本）+ `wire-schema.spec.ts`（registry 对象清单冻结 + 每样例过 schema）+ `governance-binding.spec.ts`（TS RISK_STRATEGY ↔ 语料 + deny 词汇）+ `failure-semantics.spec.ts`（失败语义 ↔ 承载 schema/FP）。
-- `scripts/release-gate.sh` Gate `Trust(CE-1 协议语料+wire Schema)`。
-
-## 规则 / Rules
-
-- **单源（CE-1 L3 / C-1）**：语义变更必须先落本目录（升语料/Schema 版本）再改实现；金样本由现实现生成（实证优先，不预设"正确答案"）。语料文件与 schema 文件名均含版本段，**不含时间戳**——确定性、可 CI diff。
-- **wire Schema v1 = 固化当前形状**（人工策展快照，非自动派生）。**新增独立 wire 对象** → 加 `schemas/v1/` + registry 条目（version v1）+ 冻结清单断言（属 v1 形状面增量）；**既有对象形状变更** → 先加 `schemas/v2/` 并更新 registry + 冻结清单断言，再改代码（CE-1 L3 单源）。
-- **语义变更评审清单**：触 tool/治理/审计/事件语义的改动 → 先按 [docs/manual/semantic-change-checklist.md](../../docs/manual/semantic-change-checklist.md) 落语料/Schema/协议文档再改代码（评审闸）。
-- 来源锚见各 schema 的 `description` 与 `wire-schema-registry.json` 的 `source`（抽取时点行号，权威以 `src/` 为准）。
-
-## 第三方自认证 / Third-party Self-cert
-
-声明兼容本协议的实现可用同一份语料复现：自身实现复算 §2.2 hash、§3 委托 token 验签、§4 风险派生、§4.3/§4.4 策略→放行决策绑定，与 `*‑v1‑vector.json` 比对一致即视为通过（协议 §5.1）。canonical 嵌套边界语义以 `canonical-json-v1-vector.json` 为准。
+三个仓与本仓**平行**：协议在本仓，实现与各自的测试夹具在各自仓。

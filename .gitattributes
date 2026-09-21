@@ -1,0 +1,14 @@
+# Normalise line endings to LF across platforms (keeps schemas and vectors byte-stable).
+* text=auto eol=lf
+
+*.json  text eol=lf
+*.md    text eol=lf
+*.mjs   text eol=lf
+*.cjs   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+
+# Binary
+*.png   binary
+*.jpg   binary
+*.jar   binary
