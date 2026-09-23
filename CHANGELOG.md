@@ -7,6 +7,32 @@
 
 ## v1.1.0 — 2026-09-23
 
+**MINOR — additive: two confirmation wire objects move to v2, splitting out the execution axis.**
+
+**Added**
+
+Two schemas and five samples under `schemas/v2/`:
+
+- `governance-confirmation-item` **v2** — adds `executionState` / `executedAt` / `executionError`
+- `my-confirmation-item` **v2** — the same, for a decision made by the person it concerns
+
+The two `wire-schema-registry.json` entries now point at v2 and list their samples. **`v1` stays where
+it is** — both versions coexist, and a consumer takes the one its registry entry names.
+
+**Why**
+
+To separate the decision axis from the execution axis. A confirmation previously recorded whether it
+had been decided, not whether it had run — so a row that was **approved and then failed to execute was
+invisible, and therefore not retryable**. v2 makes it visible and retryable.
+
+**Why this is additive**
+
+The `status` enum and the frozen vectors are untouched; the new fields are additional, so a consumer
+reading v1 is unaffected. Changing the shape of an existing object means adding `schemas/vN/` and
+updating the registry before changing an implementation — the path this version takes (README §Rules).
+
+---
+
 **MINOR · 加性：两个确认类 wire 对象升 v2，把执行轴分出来。**
 
 **新增**
