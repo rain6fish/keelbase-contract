@@ -11,7 +11,7 @@ not a figure of speech.
 |---|---|
 | [`verify-full-profile.mjs`](verify-full-profile.mjs) | The Full profile's **offline half**: every registry sample validated against the schema its entry names |
 | [`verify-protocol-conformance.mjs`](verify-protocol-conformance.mjs) | Protocol conformance: canonical JSON, the audit hash chain, the delegation token, risk derivation, governance binding |
-| [`lib/protocol-algorithms.mjs`](lib/protocol-algorithms.mjs) | The deterministic single source both runners share (Node's `crypto` only) |
+| [`lib/protocol-algorithms.mjs`](lib/protocol-algorithms.mjs) | The deterministic single source `verify-protocol-conformance.mjs` checks against (Node's `crypto` only) |
 
 `verify-full-profile.mjs`'s **online** half points at a running runtime and measures *that runtime's*
 conformance. This repository's CI does not run that half — the contract has no runtime to measure;
@@ -24,23 +24,24 @@ npm run check          # both offline halves: registry samples × schema, then t
 
 ## The runtime repository consumes these; it does not keep a copy
 
-The runtime repository's build and CI import `verify-protocol-conformance.mjs` and
-`lib/protocol-algorithms.mjs` **from here**, through the submodule, at the commit it pins. Its vector
-generator imports the same algorithm single source, so a vector and the code that produces it cannot
-drift apart without one of the two gates going red.
+The runtime repository's build and CI take these **from here**, through the submodule, at the commit it
+pins: its vector generator and one report renderer import the algorithm single source, and its CI runs
+`verify-protocol-conformance.mjs`. A vector and the code that produces it therefore cannot drift apart
+without one of the two gates going red.
 
 That is why these two were *moved* rather than copied: the algorithms are the contract's, and a second
 copy would be a second authority.
 
 ## The full-profile runner still has a twin over there
 
-`verify-full-profile.mjs` **also still exists** at `scripts/verify-full-profile.mjs` in the runtime
-repository, because its CI's `full-profile` job invokes it through a wrapper script that points at a
-fixed path. The two copies differ only in two path lines (where the contract is, where reports go).
+`verify-full-profile.mjs` has no copy there either. That repository's `full-profile` CI job reaches the
+runner **here**, through the submodule, at the commit it pins: its wrapper script starts an isolated
+backend, runs this file against it, and passes `--out` so the gap table still lands in that repository's
+`docs/benchmark/`.
 
-The condition that copy was waiting on is now met — the runtime's pin contains this directory — so it
-can be deleted and the wrapper repointed here. That is a separate change: it moves a CI wrapper rather
-than only a path, and it is the same question as the one below, one file further along.
+A second copy did live there until 2026-09-24. It existed because the wrapper pointed at a fixed path
+while the pinned submodule did not yet carry this directory — the condition its own header set for its
+deletion. Moving the runners in met that condition, so the copy went.
 
 ## The open question
 
@@ -51,7 +52,9 @@ runtime repository does) can.
 
 That is a gap in the rule rather than in this directory, and it is recorded as open rather than worked
 around: either the runners belong to the version line (so a pinned tag brings the tool with the
-contract), or each consumer keeps its own copy.
+contract), or a consumer that wants them pins a commit. The runtime repository took the second route
+when it moved its copies out — this is why the question is still open rather than closed by that move:
+it settles what *that* consumer does, not what a tag is supposed to carry.
 
 ## The boundary
 
@@ -73,7 +76,7 @@ is the thing this repository exists to prevent.
 |---|---|
 | [`verify-full-profile.mjs`](verify-full-profile.mjs) | Full 剖面的**离线半**：registry 每个对象的样本过它条目所指的 schema |
 | [`verify-protocol-conformance.mjs`](verify-protocol-conformance.mjs) | 协议合规：canonical JSON · 审计哈希链 · 委托 token · 风险派生 · 治理绑定 |
-| [`lib/protocol-algorithms.mjs`](lib/protocol-algorithms.mjs) | 两个 runner 共用的确定性单源（只依赖 Node `crypto`） |
+| [`lib/protocol-algorithms.mjs`](lib/protocol-algorithms.mjs) | `verify-protocol-conformance.mjs` 据以断言的确定性单源（只依赖 Node `crypto`） |
 
 `verify-full-profile.mjs` 的**在线半**指向一个正在跑的 runtime、量**那个 runtime** 的合规度。
 本仓 CI **不跑**它 —— 契约没有 runtime 可量；谁被量，谁自己跑。
@@ -85,21 +88,20 @@ npm run check          # 两个离线半：先 registry 样本 × schema，再�
 
 ## runtime 仓**消费**这两份，不留副本
 
-runtime 仓的构建与 CI 是**从这里** import `verify-protocol-conformance.mjs` 与
-`lib/protocol-algorithms.mjs` 的 —— 经 submodule、按它钉住的那个提交。它的语料生成器 import 的是
-同一份算法单源，于是一份语料和产出它的代码不可能悄悄分叉：两道门禁里必有一道会红。
+runtime 仓的构建与 CI 是**从这里**取这两样的 —— 经 submodule、按它钉住的那个提交：它的语料生成器与
+一个报告渲染件 import 那份算法单源，它的 CI 则跑 `verify-protocol-conformance.mjs`。于是一份语料和
+产出它的代码不可能悄悄分叉：两道门禁里必有一道会红。
 
 这两份是**搬**过来的，不是复制的：算法是契约的，而第二份副本就是第二个权威。
 
 ## full-profile runner 在那边仍有一份孪生
 
-`verify-full-profile.mjs` 在 runtime 仓**也还存在**（`scripts/verify-full-profile.mjs`），因为它 CI 的
-`full-profile` job 通过一个包装脚本调用它，而那个脚本指向一个固定路径。两份只差两行路径
-（契约在哪、报告写哪）。
+`verify-full-profile.mjs` 在那边**也不留副本**。那个仓的 `full-profile` CI job 是**从这里**取 runner
+的 —— 经 submodule、按它钉住的那个提交：它的包装脚本起一个隔离后端、拿这个文件去量，并传 `--out`
+让缺口表仍落在那个仓的 `docs/benchmark/`。
 
-那份副本当初等的条件**现在满足了** —— runtime 所钉的提交已包含本目录 —— 所以它可以删、包装脚本也可以
-改指到这里。那是**另一步**：它动的是一个 CI 包装脚本，而不只是一行路径；而且它与下面那个问题同源，
-只是多走了一个文件。
+那里在 2026-09-24 之前确实还有第二份。它存在，是因为包装脚本指向一个固定路径，而当时所钉的 submodule
+还不含本目录 —— 这正是它自己文件头为「删它」设的条件。runner 搬入使该条件成立，那份副本随之删除。
 
 ## 未决的问题
 
@@ -107,7 +109,9 @@ runner 该不该走**版本线**？今天不走：本目录是作为**仓库家�
 于是**钉 tag 的消费方取不到**这些工具，而**钉提交**的消费方（runtime 仓正是如此）取得到。
 
 这是**规则本身的缺口**，不是本目录的问题；记为**未决**而非绕过：要么 runner 属于版本线
-（钉 tag 就能连同契约一起拿到工具），要么各消费方自持副本。
+（钉 tag 就能连同契约一起拿到工具），要么想要它的消费方**钉提交**。runtime 仓在把自持副本搬走时
+走的是后一条 —— 也正因如此，那个动作**没有关闭**这个问题：它定的是**那个**消费方怎么做，
+不是「一个 tag 该不该带上这些工具」。
 
 ## 边界
 
