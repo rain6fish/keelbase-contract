@@ -1,0 +1,33 @@
+# The contract checks itself.
+#
+# Until this existed, a change here was unverified until some consumer ran its own suite against it —
+# the contract's own CONTRIBUTING said so. That put the contract's correctness in the hands of the
+# parties it is supposed to constrain, and made a mistake visible only from the outside.
+#
+# What runs is the **offline** half of the language-neutral runner: every registry sample validated
+# against the schema its entry names, against this checkout alone. No runtime, no base URL, no
+# implementation. The runner's other half points at a running runtime and measures *its* conformance —
+# that belongs to whoever is being measured, not here.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  self-check:
+    name: The contract checks itself
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run check

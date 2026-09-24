@@ -63,13 +63,21 @@ They move to the new version deliberately. The contract does not reach into them
 
 ## Verification
 
-**This repository has no CI of its own yet.** What catches a mistake today is the conformance suites
-of the consuming runtimes: they read these files and fail when an assertion no longer holds. That is
-real coverage, but it is coverage that lives somewhere else — which means a contract change is
-**unverified until at least one consumer's suite has been run against it**.
+**The contract checks itself.** CI runs the offline half of the language-neutral runner: every registry
+sample is validated against the schema its entry names, against this checkout alone — no runtime, no
+implementation, no base URL. `npm ci && npm run check` runs the same thing locally.
 
-`runner/` is where a language-neutral checker is meant to live. See [`runner/README.md`](runner/README.md)
-for what belongs there and why it has not arrived yet.
+That is new, and it replaces an arrangement worth naming: until it existed, a change here was
+**unverified until some consumer ran its own suite against it**. The contract's correctness was in the
+hands of the parties it is supposed to constrain, and a mistake was visible only from the outside.
+
+The consuming runtimes' suites still matter — they check that an *implementation* reproduces the
+contract, which is a different question from whether the contract is internally consistent. Both are
+needed; only the second one is this repository's to answer.
+
+`runner/` also carries the online half of that runner, which measures a *running runtime*. This
+repository has no runtime to measure, so nothing here runs it. See [`runner/README.md`](runner/README.md)
+for what belongs there and what has not arrived yet.
 
 ## Style
 
