@@ -4,10 +4,12 @@
 # the contract's own CONTRIBUTING said so. That put the contract's correctness in the hands of the
 # parties it is supposed to constrain, and made a mistake visible only from the outside.
 #
-# What runs is the **offline** half of the language-neutral runner: every registry sample validated
-# against the schema its entry names, against this checkout alone. No runtime, no base URL, no
-# implementation. The runner's other half points at a running runtime and measures *its* conformance —
-# that belongs to whoever is being measured, not here.
+# What runs are the **offline** halves of the language-neutral runners, against this checkout alone:
+# every registry sample validated against the schema its entry names, and every frozen vector replayed
+# against the algorithms this repository ships. No runtime, no base URL, no implementation.
+#
+# `verify-full-profile.mjs` also has an online half that points at a running runtime and measures *its*
+# conformance — that belongs to whoever is being measured, not here.
 name: CI
 
 on:

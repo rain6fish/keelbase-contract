@@ -9,7 +9,9 @@
     "url": "https://github.com/rain6fish/keelbase-contract.git"
   },
   "scripts": {
-    "check": "node runner/verify-full-profile.mjs --offline-only"
+    "check": "npm run check:schema && npm run check:protocol",
+    "check:schema": "node runner/verify-full-profile.mjs --offline-only",
+    "check:protocol": "node runner/verify-protocol-conformance.mjs"
   },
   "dependencies": {
     "ajv": "8.18.0",
