@@ -5,6 +5,51 @@
 
 ---
 
+## v1.2.0 — 2026-09-24
+
+**MINOR — additive: the capabilities payload gains the display parameters renderers need.**
+
+**Added**
+
+`schemas/v2/capabilities.schema.json` and its sample — adds a `display` block carrying `currencySymbol`.
+
+The `wire-schema-registry.json` entry now points at v2. **`v1` stays where it is** — both versions coexist,
+and a consumer takes the one its registry entry names.
+
+**Why**
+
+The money rule was single-sourced on all three ends, but the **symbol** was not: backend, web console and
+mobile each defined their own constant. One rule with three authorities is the same drift by another route —
+and it is the route that shows up as one person seeing a different currency depending on which screen they open.
+
+**Why this is additive**
+
+Nothing existing changes shape: `preset` / `features` / `ai` / `businessModules` are untouched and the new
+block is additional, so a consumer reading v1 is unaffected. Changing the shape of an existing object means
+adding `schemas/vN/` and updating the registry before changing an implementation — the path this version takes.
+
+---
+
+**MINOR · 加性：能力清单增加渲染器所需的展示参数。**
+
+**新增**
+
+`schemas/v2/capabilities.schema.json` 及其样例 —— 加一个承载 `currencySymbol` 的 `display` 块。
+
+`wire-schema-registry.json` 的该条目改指 v2。**`v1` 原地保留** —— 两版并存，消费方按 registry 的 `version` 取。
+
+**为什么**
+
+金额规则已在三端各自单源，但**符号**没有：后端、Web 管理台、移动端各定了一个常量。
+一条规则三个权威，是同一种漂移换了条路 —— 而这条路会表现为「同一个人在不同页面看到不同币种」。
+
+**为什么是加性**
+
+既有字段一个都不改形状：`preset` / `features` / `ai` / `businessModules` 未动，新块是附加的，
+读 v1 的消费方不受影响。既有对象改形状 ⇒ 先加 `schemas/vN/` 并更新 registry，再改实现 —— 本版走的正是这条。
+
+---
+
 ## v1.1.0 — 2026-09-23
 
 **MINOR — additive: two confirmation wire objects move to v2, splitting out the execution axis.**

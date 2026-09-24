@@ -304,12 +304,12 @@
     },
     {
       "id": "capabilities",
-      "version": "v1",
+      "version": "v2",
       "schema": "capabilities.schema.json",
       "title": "能力清单 GET /app/capabilities data（Renderer 原则地基，ADR-0002 Rev-8）",
-      "source": "src/app-version/capabilities.service.ts:36-56; src/feature-flags/feature-flags.constants.ts:9-49; src/common/modules/modules-manifest.ts:75-89",
+      "source": "src/app-version/capabilities.service.ts getCapabilities(); src/feature-flags/feature-flags.constants.ts:9-49; src/common/modules/modules-manifest.ts businessModules 投影",
       "samples": [
-        "schemas/v1/samples/capabilities.json"
+        "schemas/v2/samples/capabilities.json"
       ]
     },
     {
