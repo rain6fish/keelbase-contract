@@ -5,6 +5,53 @@
 
 ---
 
+## v1.3.0 — 2026-09-24
+
+**MINOR — additive: a new failure-semantics vector, carrying the confirmation artifact's destination binding.**
+
+**Added**
+
+`failure-semantics-v2-vector.json` — the eight outcomes of v1 plus one:
+`confirmation_audience_mismatch_rejected`, bound to the new corpus case `FP-11`.
+
+**Why**
+
+A confirmation artifact recorded *what* would be written (tool plus exact arguments) and never *where*.
+The delegation token has an `aud` and the receiving system checks it; the confirmation had no equivalent,
+so the same artifact stayed valid when pointed at a different destination and the runtime held nothing to
+contradict it. The new outcome makes that a named failure with an invariant rather than a hole: the
+artifact binds a destination, and reusing it across destinations does not execute.
+
+**Why this is additive**
+
+The outcome list is the vector's normative content, so v1 is not rewritten — it stays frozen at
+`failure-semantics-v1-vector.json` and both files coexist. The runtime gate reads v2. No wire object is
+added or changed: the new outcome reuses `confirmation-decision`, the same carrier
+`confirmation_replay_rejected` already binds.
+
+---
+
+**MINOR · 加性：新增一份 failure-semantics 向量，承载确认 artifact 的目的地绑定。**
+
+**新增**
+
+`failure-semantics-v2-vector.json` —— v1 的八条加一条：`confirmation_audience_mismatch_rejected`，
+绑定新语料用例 `FP-11`。
+
+**为什么**
+
+确认 artifact 记了**写什么**（工具 + 精确参数），却从未记**写到哪**。委托 token 有 `aud` 且由目标系统校验，
+确认没有对应物，于是同一个 artifact 指向另一个目的地时依然有效，运行时手里没有任何东西与它矛盾。
+新结局把这件事从「一个洞」变成「一类有名有据的失败」：artifact 绑一个目的地，跨目标复用不执行。
+
+**为什么是加性**
+
+结局清单就是本向量的**规范性内容**，故 v1 不重写 —— 它冻结留在 `failure-semantics-v1-vector.json`，两份并存。
+运行时门禁读 v2。不新增也不改任何 wire 对象：新结局复用 `confirmation-decision`，与
+`confirmation_replay_rejected` 同一个承载面。
+
+---
+
 ## v1.2.0 — 2026-09-24
 
 **MINOR — additive: the capabilities payload gains the display parameters renderers need.**
