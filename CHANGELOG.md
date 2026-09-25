@@ -5,6 +5,62 @@
 
 ---
 
+## v1.3.1 — 2026-09-25
+
+**PATCH — a descriptive field named a file that is no longer where it says.**
+
+**What changed**
+
+The `note` on `governance-binding-v1-vector.json`:
+
+```
+- 由 scripts/lib/protocol-algorithms.mjs 单源生成
++ 由 runner/lib/protocol-algorithms.mjs 单源生成
+```
+
+**Why**
+
+The algorithm single source moved into this repository when the language-neutral runners did, and this
+vector kept naming its old address in the runtime repository — a path that a reader following it would
+not find. Third parties read these notes as provenance; one that points nowhere is worse than none.
+
+**Why this is a PATCH and not a MINOR**
+
+The repository's test — *would a third party reproducing against the same corpus get a different
+answer?* — comes out no. The `note` takes part in no conformance judgment: the protocol conformance
+runner reads `gateOutcomeByStrategy`, `derivation` and `denyChecks` out of this file, and nothing else.
+No `expect`, no assertion and no wire shape moves.
+
+This is the second application of the README's exception clause (`v1.0.1` was the first).
+
+---
+
+**PATCH · 非规范性内容的更正：一个描述字段，指着一个已经不在那里的文件。**
+
+**改了什么**
+
+`governance-binding-v1-vector.json` 的 `note`：
+
+```
+- 由 scripts/lib/protocol-algorithms.mjs 单源生成
++ 由 runner/lib/protocol-algorithms.mjs 单源生成
+```
+
+**为什么**
+
+算法单源随语言中性 runner 一起搬进了本仓，而这份向量仍写着它在 runtime 仓的旧地址 ——
+照它去找的人找不到。第三方把这些 note 当出处读；指不到东西的 note 比没有更糟。
+
+**为什么这是 PATCH 而不是 MINOR**
+
+按本仓的判据 —— **「第三方按同一份语料复现，结果会不会变？」** —— **不会**：`note` 不参与任何
+conformance 判定 —— 协议合规 runner 从这份文件里读的是 `gateOutcomeByStrategy`、`derivation`
+与 `denyChecks`，仅此三样。没有 `expect`、没有断言、也没有任何 wire 形状移动。
+
+这是 README 那条例外条款的**第二个**适用案例（第一个是 `v1.0.1`）。
+
+---
+
 ## v1.3.0 — 2026-09-24
 
 **MINOR — additive: a new failure-semantics vector, carrying the confirmation artifact's destination binding.**
