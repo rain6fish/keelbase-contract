@@ -5,6 +5,69 @@
 
 ---
 
+## v1.4.0 — 2026-10-02
+
+**MINOR — an audit row gains the client device identifier.**
+
+**What changed**
+
+`ai-audit-log-row` gains a v4: one new optional property, `deviceId` (`string | null`).
+
+```
++ "deviceId": { "type": ["string", "null"] }
+```
+
+A schema and a sample are added under `schemas/v4/`; the registry points at v4. The `v1`, `v2` and `v3`
+files are left exactly as published.
+
+**Why**
+
+The row already carries the client address and the guest identifier. The device identifier answers the
+case those two cannot: behind NAT or a mobile carrier many clients share one address, so "which client
+was this" is not answerable from the address alone. The value comes from the `X-Device-Id` header,
+which the mobile client has been sending on every request for some time — the field was the missing
+half, not the reporting.
+
+**Why this is a MINOR and not a PATCH**
+
+Nothing is removed, renamed or reinterpreted: a reader of v3 sees precisely what it saw before, and a
+producer that omits the property produces a valid v4 row. It is an addition to a wire shape, and this
+repository's rule is that wire shapes grow by version, never by in-place edit.
+
+**Boundary, stated because it will be relied on**
+
+The value is **client-supplied**, exactly like `guestId` — an attribution clue, not an identity
+credential, and not proof that two rows share a physical device. It is a chain-external column: it
+never enters the hash payload, so writing it cannot break an existing chain.
+
+---
+
+**MINOR —— 审计行补上客户端设备标识。**
+
+**改了什么**
+
+`ai-audit-log-row` 出 v4：新增一个可选属性 `deviceId`（`string | null`）。
+
+```
++ "deviceId": { "type": ["string", "null"] }
+```
+
+`schemas/v4/` 下新增 schema 与样例；registry 指向 v4。`v1` / `v2` / `v3` 三个文件**原样保留**。
+
+**为什么**
+
+这一行已经带着客户端地址与访客标识。设备标识回答的是它们回答不了的那种情况：**在 NAT 或移动运营商之后，很多客户端共用同一个地址**，「这是哪一个客户端」光看地址答不出来。取值来自 `X-Device-Id` 请求头——移动端早就在每个请求上发它了，缺的是这一半，不是上报。
+
+**为什么是 MINOR 而不是 PATCH**
+
+没有删除、改名或改变解释：读 v3 的人看到的与从前一模一样，而不带该属性的生产者产出的仍是合法的 v4 行。这是**对 wire 形状的增补**，而本仓规矩是 wire 形状**按版本增长、不做就地修改**。
+
+**边界（写明，因为它会被依赖）**
+
+该值**由客户端提供**，与 `guestId` 性质相同——它是**归因线索，不是身份凭证**，也不能证明两行来自同一台物理设备。它是**链外列**：从不进入 hash payload，故写入它不可能破坏既有链。
+
+---
+
 ## v1.3.1 — 2026-09-25
 
 **PATCH — a descriptive field named a file that is no longer where it says.**
