@@ -75,12 +75,12 @@
     },
     {
       "id": "trace-step",
-      "version": "v1",
-      "schema": "trace-step.schema.json",
-      "title": "Conversation Trace Step（GET /ai/conversations/:id/trace data.steps[]）",
-      "source": "src/ai/trace/decision-trace.service.ts:22-66",
+      "version": "v2",
+      "schema": "v2/trace-step.schema.json",
+      "title": "Conversation Trace Step（GET /ai/conversations/:id/trace data.steps[]，v2：`outcome` 加 `pending_approval`；v1 为 approve/decline/timeout）",
+      "source": "src/ai/trace/decision-trace.service.ts",
       "samples": [
-        "schemas/v1/samples/trace-step.json"
+        "schemas/v2/samples/trace-step.json"
       ]
     },
     {

@@ -5,6 +5,77 @@
 
 ---
 
+## v1.5.0 — 2026-10-03
+
+**MINOR — a trace step's outcome gains the fourth value the record already had.**
+
+**What changed**
+
+`trace-step` gains a v2: the `outcome` enum widens from three values to four.
+
+```
+- "outcome": { "enum": ["approve", "decline", "timeout"] }
++ "outcome": { "enum": ["approve", "decline", "timeout", "pending_approval"] }
+```
+
+A schema and a sample are added under `schemas/v2/`; the registry points at v2. The `v1` file is left
+exactly as published.
+
+**Why**
+
+An R4 high-impact action is not confirmed inline — it is routed to human approval, and the audit row
+records that with `action: 'tool_confirmation'` and `→ pending_approval`. Readers that knew only three
+outcomes collapsed that word into `timeout`, so a compliance sentence said the user timed out and the
+trace rendered "Timed out" — for an action that the same row says was sent for approval. The record
+had four values; the wire had three.
+
+**Why this is a MINOR and not a PATCH**
+
+`approve`, `decline` and `timeout` keep their meaning, and a v1 reader still sees only those three for
+every step except the new case. It is a widening of a wire enum, and this repository's rule is that
+wire shapes grow by version, never by in-place edit.
+
+**Boundary, stated because it will be relied on**
+
+Widening an enum is the one shape change that reaches a reader without adding a property: a consumer
+that switches on `outcome` with no default now has a value it never handled. That is exactly why this
+is a version rather than an in-place edit — the v1 file stays as published, so a consumer pinned to it
+can see what it actually agreed to.
+
+---
+
+**MINOR —— 轨迹步的 `outcome` 补上它在记录里早就有、线上却没有的第四个取值。**
+
+**改了什么**
+
+`trace-step` 出 v2：`outcome` 枚举由三个取值扩为四个。
+
+```
+- "outcome": { "enum": ["approve", "decline", "timeout"] }
++ "outcome": { "enum": ["approve", "decline", "timeout", "pending_approval"] }
+```
+
+`schemas/v2/` 下新增 schema 与样例；registry 就地指向 v2。`v1` 文件按发布原样保留。
+
+**为什么**
+
+R4 高影响动作**不走内联确认**，而是被**转人工审批**，审计行以 `action: 'tool_confirmation'` +
+`→ pending_approval` 记下这件事。只认识三个取值的读取方把那句话塌成 `timeout`，于是合规叙述说用户超时、
+轨迹渲染成「已超时」——而那一行自己写的是「已转人工审批」。**记录里有四个值，线上只有三个。**
+
+**为什么这是 MINOR 而非 PATCH**
+
+`approve` / `decline` / `timeout` 的语义未变，v1 读取方除这一新情形外看到的仍只是那三个。
+这是 wire 枚举的**放宽**，而本仓的规矩是 wire 形状**按版本成长、绝不就地改**。
+
+**边界（写明，因为会被依赖）**
+
+枚举放宽是唯一一种**不加属性也能到达读取方**的形状变更：对 `outcome` 做无 default 的 switch 的消费方，
+现在会拿到一个它从未处理过的取值。这正是它必须是一个版本、而不是一次就地改的原因——v1 文件按发布原样
+保留，钉住它的消费方能看清自己当时同意的到底是什么。
+
+---
+
 ## v1.4.0 — 2026-10-02
 
 **MINOR — an audit row gains the client device identifier.**
