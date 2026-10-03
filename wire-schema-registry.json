@@ -85,15 +85,15 @@
     },
     {
       "id": "side-effect-revoke",
-      "version": "v3",
-      "schema": "v3/side-effect-revoke.schema.json",
-      "title": "AI 写副作用 item / 执行轨迹 traceItem / 撤销结果 / 批量（v3：级联补偿加 compensationGroup+parentEffectId+cascade；v2 为 KB-6 revokeClass）",
+      "version": "v4",
+      "schema": "v4/side-effect-revoke.schema.json",
+      "title": "AI 写副作用 item / 执行轨迹 traceItem / 撤销结果 / 批量（v4：级联补偿加 compensationGroup+parentEffectId+cascade；v2 为 KB-6 revokeClass）",
       "source": "src/ai/tool-effects/ai-tool-effects.service.ts; src/ai/tool-effects/effect-composition.ts; src/ai/interfaces/tool.interface.ts",
       "samples": [
-        "schemas/v3/samples/side-effect-revoke-item-grouped.json",
-        "schemas/v3/samples/side-effect-revoke-trace-item.json",
-        "schemas/v3/samples/side-effect-revoke-result.json",
-        "schemas/v3/samples/side-effect-revoke-cascade-result.json"
+        "schemas/v4/samples/side-effect-revoke-item-grouped.json",
+        "schemas/v4/samples/side-effect-revoke-trace-item.json",
+        "schemas/v4/samples/side-effect-revoke-result.json",
+        "schemas/v4/samples/side-effect-revoke-cascade-result.json"
       ]
     },
     {

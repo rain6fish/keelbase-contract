@@ -5,6 +5,74 @@
 
 ---
 
+## v1.6.0 — 2026-10-03
+
+**MINOR — the revoke result declares the keys it was already emitting, and gains one.**
+
+**What changed**
+
+`side-effect-revoke` gains a v4. `revokeResult` declares three properties it was already emitting or now
+emits, and the batch's per-item result declares the third alongside them:
+
+```
+  + "skipped":  { "type": "boolean" }
+  + "reason":   { "type": "string" }
+  + "downstreamReferences": { "type": "array", "items": {
+        "table": string, "remaining": number } }
+```
+
+Schemas and samples are added under `schemas/v4/`; the registry points at v4. The `v3` file and its
+samples are left exactly as published.
+
+**Why**
+
+`skipped` and `reason` have been on the wire since the idempotent-skip path was added; the schema never
+declared them, so the shape a consumer actually receives was wider than the shape it was told about. The
+new property is REV-16's answer: a revoke verdict reads `revoke_status` and the target's soft-delete mark,
+and neither knows about rows **derived from** the target, so compensating a project soft-deletes it while
+milestones added to it afterwards keep pointing at it. `downstreamReferences` reports what the revoke did
+not reach.
+
+**Two readings this property keeps apart, and a boundary**
+
+It is present only when the target's type has a reference model: an **absent** field means *not checked*,
+an **empty array** means *checked, nothing points at it*. Collapsing the two would report every unmodelled
+type as clean. The verdict does not change and nothing is cascaded — this reports what the revoke did not
+reach, which is what the verdict alone could not say. Rows belonging to targets revoked in the same
+operation, and soft-deleted referrers, are not counted: neither is live downstream state.
+
+---
+
+**MINOR —— 撤销结果把它本来就在发的键补进声明面，并新增一个。**
+
+**改了什么**
+
+`side-effect-revoke` 出 v4。`revokeResult` 声明三个它本来就在发、或现在才发的属性；批量逐条结果同样声明第三个。
+
+```
+  + "skipped":  { "type": "boolean" }
+  + "reason":   { "type": "string" }
+  + "downstreamReferences": { "type": "array", "items": {
+        "table": string, "remaining": number } }
+```
+
+`schemas/v4/` 下新增 schema 与样例；registry 就地指向 v4。`v3` 及其样例按发布原样保留。
+
+**为什么**
+
+`skipped` 与 `reason` 自幂等跳过路径落地起就一直在线上，而 schema 从未声明过它们 —— 消费者实际收到的形状比
+被告知的更宽。新属性是 REV-16 的答案：撤销判定读 `revoke_status` 与目标的软删标记，两者都不知道**派生自**
+目标的行，于是补偿一个项目会软删它，而之后给它加的里程碑仍指着它。`downstreamReferences` 报的就是这次撤销
+**没够到**的部分。
+
+**这个属性分开的两种读数，以及一条边界**
+
+只在目标类型有引用模型时出现：字段**缺席**是**未检查**，**空数组**是**查过、没有东西指着它**。把两者塌在一起，
+会让每一个未建模的类型都报成干净。判定不因此改变，也不级联任何东西 —— 它报的是这次撤销没够到的部分，而那正是
+单看判定说不出来的。同一次操作里一并撤销的目标所拥有的行、以及已软删的引用行都不计入：两者都不是活着的下游状态。
+
+---
+
 ## v1.5.0 — 2026-10-03
 
 **MINOR — a trace step's outcome gains the fourth value the record already had.**
