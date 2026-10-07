@@ -52,6 +52,7 @@ import {
   resolveRiskLevel,
   needsConfirmation,
 } from './lib/protocol-algorithms.mjs';
+import { mdCell } from './lib/md-table.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // The repository root is the contract itself; in the runtime repository this pointed at specs/protocol.
@@ -250,7 +251,7 @@ const md = [
   `# AI Governance Protocol Conformance（${ts}）`, '',
   `- ${passCount}/${results.length} 通过 ｜ 总耗时 ${Math.round(elapsed / 1000)}s ｜ 协议：审计链 / 委托 token / 工具风险分级（语料驱动，本仓根目录）`, '',
   '| # | 断言 | 结果 | 详情 |', '|---|------|------|------|',
-  ...results.map((r, i) => `| ${i + 1} | ${r.name} | ${r.pass ? '✅' : '❌'} | ${r.detail} |`), '',
+  ...results.map((r, i) => `| ${i + 1} | ${mdCell(r.name)} | ${r.pass ? '✅' : '❌'} | ${mdCell(r.detail)} |`), '',
 ].join('\n');
 writeFileSync(`${base}.md`, md);
 

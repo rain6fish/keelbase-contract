@@ -28,6 +28,7 @@ import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
+import { mdCell } from './lib/md-table.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SPECS_DIR = resolve(__dirname, '..'); // 本仓根 = 契约本身（搬来前在主仓时指 specs/protocol）
@@ -219,10 +220,10 @@ const md = [
   '',
   '| # | 剖面 | 判定项 | 结果 | 详情 |',
   '|---|---|---|---|---|',
-  ...results.map((r, i) => `| ${i + 1} | ${r.profile} | ${r.name} | ${r.pass ? '✅' : '❌'} | ${r.detail} |`),
+  ...results.map((r, i) => `| ${i + 1} | ${mdCell(r.profile)} | ${mdCell(r.name)} | ${r.pass ? '✅' : '❌'} | ${mdCell(r.detail)} |`),
   '',
   ...(gaps.length
-    ? ['## 缺口表（需要实现的）', '', '| 剖面 | 缺口 | 证据 |', '|---|---|---|', ...gaps.map((g) => `| ${g.profile} | ${g.name} | ${g.detail} |`), '']
+    ? ['## 缺口表（需要实现的）', '', '| 剖面 | 缺口 | 证据 |', '|---|---|---|', ...gaps.map((g) => `| ${mdCell(g.profile)} | ${mdCell(g.name)} | ${mdCell(g.detail)} |`), '']
     : ['**无缺口**——该目标满足 Full 剖面 F4 + F5。', '']),
 ].join('\n');
 writeFileSync(`${base}.md`, md);
