@@ -5,6 +5,62 @@
 
 ---
 
+## v1.6.1 — 2026-10-07
+
+**PATCH — six provenance anchors named a directory that is no longer there.**
+
+**What changed**
+
+The source anchors on three objects — `governance-policy`, `external-effects-query` and
+`internal-approvals-execute` — in both their schema `description` and the registry's `source`:
+
+```
+- src/ai/governance/…
++ src/ai/governance-bridge/…
+```
+
+**Why**
+
+The runtime renamed its business-side governance directory so that it no longer reads as a second
+governance: `src/governance` is the control plane, and a sibling also called `governance` gave a
+reader no way to tell which side of the seam they had landed on. The anchors kept naming the old
+address — the failure `v1.3.1` fixed, with the same consequence: a third party following them finds
+nothing.
+
+**Why this is a PATCH and not a MINOR**
+
+The repository's own test — *would a third party reproducing against the same corpus get a different
+answer?* — comes out no. These anchors take part in no conformance judgment, and the registry's
+`source` is read by no runner. No `expect`, no assertion and no wire shape moves.
+
+---
+
+**PATCH · 六个出处锚指着一个已经不在那里的目录。**
+
+**改了什么**
+
+三个对象 —— `governance-policy`、`external-effects-query`、`internal-approvals-execute` —— 的出处锚；
+schema 的 `description` 与 registry 的 `source` 两处都算：
+
+```
+- src/ai/governance/…
++ src/ai/governance-bridge/…
+```
+
+**为什么**
+
+运行时把它那侧「业务侧治理」目录改了名，为的是它不再读成第二个治理：`src/governance` 是控制平面，
+而一个同样叫 `governance` 的兄弟目录让人无从判断自己落在了接缝的哪一侧。这些锚仍写着旧地址 ——
+与 `v1.3.1` 修掉的是同一种失效，后果也一样：照着它去找的第三方什么也找不到。
+
+**为什么这是 PATCH 而不是 MINOR**
+
+按本仓自己的判据 —— **「第三方按同一份语料复现，结果会不会变？」** —— **不会**：这些锚不参与任何
+conformance 判定，registry 的 `source` 也没有任何 runner 读它。没有 `expect`、没有断言、也没有任何
+wire 形状移动。
+
+---
+
 ## v1.6.0 — 2026-10-03
 
 **MINOR — the revoke result declares the keys it was already emitting, and gains one.**

@@ -154,7 +154,7 @@
       "version": "v1",
       "schema": "governance-policy.schema.json",
       "title": "治理策略（GET/PUT /ai/governance/policy）",
-      "source": "src/ai/governance/governance-policy.service.ts:18-49",
+      "source": "src/ai/governance-bridge/governance-policy.service.ts:18-49",
       "samples": [
         "schemas/v1/samples/governance-policy.json"
       ]
@@ -255,7 +255,7 @@
       "version": "v1",
       "schema": "external-effects-query.schema.json",
       "title": "服务身份副作用查询返回 GET /external/effects/:resultType/:resultId",
-      "source": "src/ai/governance/external-effects.controller.ts:22-54",
+      "source": "src/ai/governance-bridge/external-effects.controller.ts:22-54",
       "samples": [
         "schemas/v1/samples/external-effects-query.json"
       ]
@@ -265,7 +265,7 @@
       "version": "v1",
       "schema": "internal-approvals-execute.schema.json",
       "title": "治理台 approve 回调 POST /internal/approvals/:token/execute（R4，decision approve|decline）",
-      "source": "src/ai/governance/internal-approvals.controller.ts:19-30",
+      "source": "src/ai/governance-bridge/internal-approvals.controller.ts:19-30",
       "samples": [
         "schemas/v1/samples/internal-approvals-execute.json"
       ]
