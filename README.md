@@ -11,10 +11,12 @@
 .
 ├── canonical-json-v1-vector.json     # §2.3 canonicalJSON 金样本（flat/nested/array/null/number/unicode 边界）
 ├── audit-hash-v1-vector.json         # §2 hash / legacy 派生 / 链校验 / 篡改反例
+├── ai-audit-log-outcome-v1-vector.json # AI 审计行 outcome 词表（结构化结果码）
 ├── delegation-token-v1-vector.json   # §3 委托 token（相对时间构造 → 确定性、无时间戳）
 ├── risk-level-v1-vector.json         # §4 风险分级派生 + RISK_STRATEGY 表
 ├── governance-binding-v1-vector.json # §4.3/§4.4 策略→放行决策绑定 + deny 依据词表
 ├── failure-semantics-v1-vector.json  # 失败语义 wire 级绑定：失败词汇 → 承载 schema → 语料 FP
+├── failure-semantics-v2-vector.json  # 失败语义 v2（当前）
 ├── confirmation-lifecycle-v1-vector.json   # 确认生命周期 v1（冻结留档）
 ├── confirmation-lifecycle-v2-vector.json   # 确认生命周期 v2（当前）
 ├── wire-schema-registry.json         # wire 对象冻结清单（对象 → schema → 样例）+ schemasDir
