@@ -5,6 +5,77 @@
 
 ---
 
+## v1.7.0 — 2026-10-11
+
+**MINOR — an audit row says what happened without anyone parsing its prose, the tenant becomes a dimension of its own, and the registry's paths get a gate.**
+
+**What changed**
+
+`ai-audit-log-row` gains a **v5**: two out-of-chain attribution columns, `outcome` — a frozen
+vocabulary — and `tool`, the tool the row is about. Nine samples carry one value each, so a consumer
+can replay every one of them, and a new vector, `ai-audit-log-outcome-v1-vector.json`, pins the
+vocabulary together with which values are legal for which `action`, and replays that grouping in cases
+the conformance runner checks. The hash payload and `action`'s enum are untouched.
+
+`org-membership-scope` gains its own **v5**: `tenant` sits beside `org` rather than inside it, and it is
+not required — the main repository has no tenant concept today, so requiring it would write a field
+into the contract that no implementation emits.
+
+The runner gains a **report-only** gate over registry path resolution, which turned up two paths that
+resolve to nothing; they are frozen debt and named as such rather than silently accepted.
+
+**Why**
+
+The evaluation surface read an audit row's outcome by matching free text in `detail` and took the tool
+name from its first token — a parse that only works on one of the two implementations, whose `detail`
+grammars differ (`<tool> <verb> …` against `<tool>(<argsJson>)`). `action` cannot answer it: it is a
+frozen enum whose values name what kind of thing happened, never how one turned out.
+
+Two of the ten values were found by reading the writers rather than the design, and both are shapes
+that already existed: `timeout`, the contract's own word from `confirmation-lifecycle-v2` for an ending
+nobody decides — neither a decline nor a failure — and `attempted` for a row that only records the try,
+because an intent row is not an ending and its result is the row after it. Folding either into an
+existing value would have erased a distinction the data already carries.
+
+Which values are legal depends on `action`, and the grouping is closed rather than permissive: a row
+that carries an outcome its action does not allow is a mistake the vector names outright. Folding the
+tenant into `org` would have made "changed organisation" and "changed tenant" indistinguishable on the
+wire, which is why it is a sibling and not a child.
+
+---
+
+**MINOR —— 审计行不用谁去解析它的散文就能说出发生了什么；租户成了自己的一维；registry 的路径有了一道闸。**
+
+**改了什么**
+
+`ai-audit-log-row` 出 **v5**：两列**链外归因列** —— `outcome`（冻结词表）与 `tool`（本行所属的工具）。
+九份样例一个值一份，消费方可以逐个复跑；新增向量 `ai-audit-log-outcome-v1-vector.json`，把词表连同
+「哪些值对哪种 `action` 合法」一并钉住，并把那套分组写成 conformance runner 会跑的 case。**hash 载荷与
+`action` 的 enum 一字未动。**
+
+`org-membership-scope` 出自己的 **v5**：`tenant` 放在 `org` **旁边**、不是**里面**，且**不在** `required`
+里 —— 主仓今天没有租户概念，做成必需等于把一个**没有任何实现产出**的字段写进契约。
+
+runner 新增一道 registry 路径解析的**只报告**门禁，它查出两条**解析不到任何东西**的路径；它们是被冻结的
+债，**点名列出**，而不是悄悄放过。
+
+**为什么**
+
+评估面此前从 `detail` 里靠匹配自由文本读出结局、并拿第一个 token 当工具名 —— 而那个解析**只在两个实现中的
+一个上成立**，因为两者的 `detail` 文法不同（`<tool> <动词> …` 对 `<tool>(<argsJson>)`）。`action` 答不了这件
+事：它是冻结 enum，取值只说明**发生了哪一类事**，永远说不出**这一次的结局**。
+
+十个值里有**两个**是**读写入点**、而不是设计时发现的，且两者都是**已经存在**的形状：`timeout`（「等待窗口
+走完、没人裁」的那个结局，用的是契约自己在 `confirmation-lifecycle-v2` 里的词 —— 既不是拒绝、也不是失败），
+以及 `attempted`（只记「试过」的那一行 —— **intent 行不是一次结局**，它的结局在**后面**那一行）。把任一个折进
+已有的值，都会抹掉数据本来就带着的区分。
+
+哪些值合法**取决于 `action`**，而那套分组是**封闭**的、不是宽松的：一行带了它那个 action 不允许的结局，
+就是**向量会直接点名**的错误。把租户折进 `org`，会让「换了组织」与「换了租户」在 wire 上**不可分** ——
+这正是它做**兄弟**、不做**子项**的缘故。
+
+---
+
 ## v1.6.1 — 2026-10-07
 
 **PATCH — six provenance anchors named a directory that is no longer there.**
