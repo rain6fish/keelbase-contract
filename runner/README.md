@@ -11,6 +11,7 @@ not a figure of speech.
 |---|---|
 | [`verify-full-profile.mjs`](verify-full-profile.mjs) | The Full profile's **offline half**: every registry sample validated against the schema its entry names |
 | [`verify-protocol-conformance.mjs`](verify-protocol-conformance.mjs) | Protocol conformance: canonical JSON, the audit hash chain, the delegation token, risk derivation, governance binding |
+| [`check-registry-paths.mjs`](check-registry-paths.mjs) | Registry path resolution, **report-only**: every `objects[].schema` must resolve to a file on disk (the two frozen-debt entries are allowlisted — ADR-0007 §3 Q10) |
 | [`lib/protocol-algorithms.mjs`](lib/protocol-algorithms.mjs) | The deterministic single source `verify-protocol-conformance.mjs` checks against (Node's `crypto` only) |
 
 `verify-full-profile.mjs`'s **online** half points at a running runtime and measures *that runtime's*
@@ -19,7 +20,7 @@ whoever is being measured runs it.
 
 ```bash
 npm ci
-npm run check          # both offline halves: registry samples × schema, then the vectors × the algorithms
+npm run check          # the offline checks: registry samples × schema, the vectors × the algorithms, then registry path resolution (report-only)
 ```
 
 ## The runtime repository consumes these; it does not keep a copy
@@ -76,6 +77,7 @@ is the thing this repository exists to prevent.
 |---|---|
 | [`verify-full-profile.mjs`](verify-full-profile.mjs) | Full 剖面的**离线半**：registry 每个对象的样本过它条目所指的 schema |
 | [`verify-protocol-conformance.mjs`](verify-protocol-conformance.mjs) | 协议合规：canonical JSON · 审计哈希链 · 委托 token · 风险派生 · 治理绑定 |
+| [`check-registry-paths.mjs`](check-registry-paths.mjs) | registry 路径解析，**只报告**：每条 `objects[].schema` 须能解析到实盘文件（两条冻结的债已 allowlist —— ADR-0007 §3 Q10） |
 | [`lib/protocol-algorithms.mjs`](lib/protocol-algorithms.mjs) | `verify-protocol-conformance.mjs` 据以断言的确定性单源（只依赖 Node `crypto`） |
 
 `verify-full-profile.mjs` 的**在线半**指向一个正在跑的 runtime、量**那个 runtime** 的合规度。
@@ -83,7 +85,7 @@ is the thing this repository exists to prevent.
 
 ```bash
 npm ci
-npm run check          # 两个离线半：先 registry 样本 × schema，再语料 × 算法
+npm run check          # 离线检查：先 registry 样本 × schema，再语料 × 算法，最后 registry 路径解析（只报告）
 ```
 
 ## runtime 仓**消费**这两份，不留副本
