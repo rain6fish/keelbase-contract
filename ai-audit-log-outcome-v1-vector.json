@@ -4,6 +4,7 @@
   "license": "Apache-2.0",
   "note": "钉的是**词表本身**：每个值什么意思、哪些值对哪种 `action` 合法。**刻意不放**「某个实现的 `detail` 文本 → 某个值」的映射——那等于把实现的措辞烧进契约，而契约要能扛住任何一个实现换措辞。`detail` 的文本是产出方的事。判据：消费方拿自己的行来跑 `cases`，合法的必须被接受、不合法的必须被拒。",
   "outcomes": {
+    "attempted": "**只记「试过」** —— 它的结局在**后面**那一行。引擎在真正执行**之前**写下它，好让「谁尝试过」**永不缺行**（`D36 ②`）。**它不是一次结局**：其余值说的是「这次提议怎么了」，它说的是**这一刻还没走到那一步**。一次成功的执行因此有**两行**：`attempted` + `executed`。",
     "executed": "真执行了。含**幂等复用**（同一调用重放、复用已有 effect）。",
     "pending": "已提议、**等人裁决**。含两人规则那一档（`awaiting a second person's …`）。",
     "blocked": "**风险策略**挡下，没到裁决。⚠ 与 `refused` 是两道**不同**的闸，不得合并。",
@@ -15,12 +16,13 @@
     "revoked": "副作用已**撤销**（`effect_revoke` 行的结局）。"
   },
   "legalByAction": {
-    "tool_call": ["executed", "pending", "blocked", "refused", "declined", "failed"],
+    "tool_call": ["attempted", "executed", "pending", "blocked", "refused", "declined", "failed"],
     "tool_confirmation": ["approved", "declined", "pending", "timeout"],
     "effect_revoke": ["revoked"],
     "any-other-action": [null]
   },
   "cases": [
+    { "id": "tc-attempted", "name": "tool_call + attempted（只记「试过」；结局在它后面那一行）", "in": { "action": "tool_call", "outcome": "attempted" }, "expect": { "legal": true } },
     { "id": "tc-executed", "name": "tool_call + executed", "in": { "action": "tool_call", "outcome": "executed" }, "expect": { "legal": true } },
     { "id": "tc-pending", "name": "tool_call + pending", "in": { "action": "tool_call", "outcome": "pending" }, "expect": { "legal": true } },
     { "id": "tc-blocked", "name": "tool_call + blocked", "in": { "action": "tool_call", "outcome": "blocked" }, "expect": { "legal": true } },
@@ -35,6 +37,7 @@
 
     { "id": "chat-null", "name": "非工具行：outcome 必须缺席或 null", "in": { "action": "chat", "outcome": null }, "expect": { "legal": true } },
     { "id": "chat-executed", "name": "非工具行不得带 outcome", "in": { "action": "chat", "outcome": "executed" }, "expect": { "legal": false } },
+    { "id": "chat-attempted", "name": "非工具行也不得带 attempted（「试过」只对工具调用成立）", "in": { "action": "chat", "outcome": "attempted" }, "expect": { "legal": false } },
     { "id": "chat-timeout", "name": "非工具行也不得带 timeout", "in": { "action": "chat", "outcome": "timeout" }, "expect": { "legal": false } },
     { "id": "tc-approved", "name": "tool_call 不得答 approved（那是裁决事件、不是提议结局）", "in": { "action": "tool_call", "outcome": "approved" }, "expect": { "legal": false } },
     { "id": "tc-revoked", "name": "tool_call 不得答 revoked（撤销有自己的 action）", "in": { "action": "tool_call", "outcome": "revoked" }, "expect": { "legal": false } },

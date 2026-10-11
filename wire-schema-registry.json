@@ -350,6 +350,7 @@
       "title": "AI 审计查询行（v5：+ outcome 结构化结果码 / tool 工具名，C-3；v4 为 deviceId、v3 为 guestId、v2 为 ip）",
       "source": "src/ai/audit/audit.service.ts _queryLogs",
       "samples": [
+        "schemas/v5/samples/ai-audit-log-row-attempted.json",
         "schemas/v5/samples/ai-audit-log-row-executed.json",
         "schemas/v5/samples/ai-audit-log-row-pending.json",
         "schemas/v5/samples/ai-audit-log-row-blocked.json",
