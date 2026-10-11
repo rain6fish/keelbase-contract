@@ -212,6 +212,42 @@ const bindingVectors = SPECS('governance-binding-v1-vector.json');
     : bad('授权拒绝依据词表唯一且非空', JSON.stringify(denies));
 }
 
+/* ═══════════ 审计行的结果码词表（ai-audit-log-row v5，C-3） ═══════════ */
+
+console.log('\n─ 审计行结果码词表（ai-audit-log-row v5）─');
+
+const outcomeVectors = SPECS('ai-audit-log-outcome-v1-vector.json');
+{
+  const declared = Object.keys(outcomeVectors.outcomes).sort();
+  const grouped = [...new Set(
+    Object.entries(outcomeVectors.legalByAction)
+      .filter(([action]) => action !== 'any-other-action')
+      .flatMap(([, values]) => values),
+  )].sort();
+  JSON.stringify(grouped) === JSON.stringify(declared)
+    ? ok('legalByAction 恰好覆盖 outcomes 的每一个值（且不多不少）', `${declared.length} 值`)
+    : bad('legalByAction 恰好覆盖 outcomes 的每一个值', `outcomes=${declared} · grouped=${grouped}`);
+
+  const nullOnlyOutside = Object.entries(outcomeVectors.legalByAction)
+    .filter(([, values]) => values.includes(null))
+    .map(([action]) => action);
+  JSON.stringify(nullOnlyOutside) === JSON.stringify(['any-other-action'])
+    ? ok('null 只对「非工具行」合法', 'any-other-action')
+    : bad('null 只对「非工具行」合法', JSON.stringify(nullOnlyOutside));
+
+  let casesOk = true;
+  for (const c of outcomeVectors.cases) {
+    const group = outcomeVectors.legalByAction[c.in.action] ?? outcomeVectors.legalByAction['any-other-action'];
+    const isToolAction = c.in.action in outcomeVectors.legalByAction && !group.includes(null);
+    const legal = 'outcome' in c.in ? group.includes(c.in.outcome) : c.in.tool !== undefined && isToolAction;
+    if (legal !== c.expect.legal) {
+      casesOk = false;
+      bad(c.name, `语料自称 ${c.expect.legal}，按 legalByAction 判为 ${legal}`);
+    }
+  }
+  casesOk && ok('每一条 case 与 legalByAction 自洽（合法的被接受、不合法的被拒）', `${outcomeVectors.cases.length} 条`);
+}
+
 /* ═══════════ 报告 ═══════════ */
 
 const passCount = results.filter((r) => r.pass).length;
@@ -226,6 +262,7 @@ const report = {
     delegationToken: tokenVectors.vectorVersion,
     riskLevel: riskVectors.vectorVersion,
     governanceBinding: bindingVectors.vectorVersion,
+    auditLogOutcome: outcomeVectors.vectorVersion,
   },
   date: ts,
   pass: passCount,

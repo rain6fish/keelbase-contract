@@ -344,13 +344,20 @@
       ]
     },
     {
-      "version": "v4",
+      "version": "v5",
       "id": "ai-audit-log-row",
-      "schema": "v4/ai-audit-log-row.schema.json",
-      "title": "AI 审计查询行（v4：+ deviceId 设备标识，AU-2 余项；v3 为 guestId、v2 为 ip）",
+      "schema": "v5/ai-audit-log-row.schema.json",
+      "title": "AI 审计查询行（v5：+ outcome 结构化结果码 / tool 工具名，C-3；v4 为 deviceId、v3 为 guestId、v2 为 ip）",
       "source": "src/ai/audit/audit.service.ts _queryLogs",
       "samples": [
-        "schemas/v4/samples/ai-audit-log-row.json"
+        "schemas/v5/samples/ai-audit-log-row-executed.json",
+        "schemas/v5/samples/ai-audit-log-row-pending.json",
+        "schemas/v5/samples/ai-audit-log-row-blocked.json",
+        "schemas/v5/samples/ai-audit-log-row-refused.json",
+        "schemas/v5/samples/ai-audit-log-row-declined.json",
+        "schemas/v5/samples/ai-audit-log-row-failed.json",
+        "schemas/v5/samples/ai-audit-log-row-approved.json",
+        "schemas/v5/samples/ai-audit-log-row-revoked.json"
       ]
     },
     {
