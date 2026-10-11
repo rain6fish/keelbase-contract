@@ -11,11 +11,12 @@
     "declined": "**人工**拒绝（`tool_confirmation` 行的结局，也见于被裁决挡下的提议）。",
     "failed": "执行**本身**失败（工具抛错 / 超时等），不是治理挡下。",
     "approved": "人工**批准**（`tool_confirmation` 行的结局）。之后是否真写成，看那次执行自己的行。",
+    "timeout": "等待窗口走完、**没人裁**（`tool_confirmation` 行的结局）。取契约自己 `confirmation-lifecycle-v2` 的那个词 —— **既不是「拒绝」，也不是执行失败**：没人做决定，提案静默作废。",
     "revoked": "副作用已**撤销**（`effect_revoke` 行的结局）。"
   },
   "legalByAction": {
     "tool_call": ["executed", "pending", "blocked", "refused", "declined", "failed"],
-    "tool_confirmation": ["approved", "declined", "pending"],
+    "tool_confirmation": ["approved", "declined", "pending", "timeout"],
     "effect_revoke": ["revoked"],
     "any-other-action": [null]
   },
@@ -30,15 +31,18 @@
     { "id": "cf-declined", "name": "tool_confirmation + declined", "in": { "action": "tool_confirmation", "outcome": "declined" }, "expect": { "legal": true } },
     { "id": "cf-pending", "name": "tool_confirmation + pending", "in": { "action": "tool_confirmation", "outcome": "pending" }, "expect": { "legal": true } },
     { "id": "rv-revoked", "name": "effect_revoke + revoked", "in": { "action": "effect_revoke", "outcome": "revoked" }, "expect": { "legal": true } },
+    { "id": "cf-timeout", "name": "tool_confirmation + timeout（等待窗口走完、没人裁）", "in": { "action": "tool_confirmation", "outcome": "timeout" }, "expect": { "legal": true } },
 
     { "id": "chat-null", "name": "非工具行：outcome 必须缺席或 null", "in": { "action": "chat", "outcome": null }, "expect": { "legal": true } },
     { "id": "chat-executed", "name": "非工具行不得带 outcome", "in": { "action": "chat", "outcome": "executed" }, "expect": { "legal": false } },
+    { "id": "chat-timeout", "name": "非工具行也不得带 timeout", "in": { "action": "chat", "outcome": "timeout" }, "expect": { "legal": false } },
     { "id": "tc-approved", "name": "tool_call 不得答 approved（那是裁决事件、不是提议结局）", "in": { "action": "tool_call", "outcome": "approved" }, "expect": { "legal": false } },
     { "id": "tc-revoked", "name": "tool_call 不得答 revoked（撤销有自己的 action）", "in": { "action": "tool_call", "outcome": "revoked" }, "expect": { "legal": false } },
     { "id": "rv-executed", "name": "effect_revoke 只能答 revoked", "in": { "action": "effect_revoke", "outcome": "executed" }, "expect": { "legal": false } },
     { "id": "outside-vocabulary", "name": "词表外的取值一律不合法（示例：ok——那是文本里的词，不是本列的取值）", "in": { "action": "tool_call", "outcome": "ok" }, "expect": { "legal": false } },
 
     { "id": "tool-on-tool-call", "name": "工具行带工具名", "in": { "action": "tool_call", "tool": "create_followup_task" }, "expect": { "legal": true } },
-    { "id": "tool-on-non-tool", "name": "非工具行不得带工具名（别拿 detail 的第一个 token 去凑）", "in": { "action": "knowledge", "tool": "search_knowledge" }, "expect": { "legal": false } }
+    { "id": "tool-on-non-tool", "name": "非工具行不得带工具名（别拿 detail 的第一个 token 去凑）", "in": { "action": "knowledge", "tool": "search_knowledge" }, "expect": { "legal": false } },
+    { "id": "tool-null-on-run-confirmation", "name": "一次裁决涉及**多个**工具（run 级）→ tool 为 null 合法", "in": { "action": "tool_confirmation", "tool": null }, "expect": { "legal": true } }
   ]
 }

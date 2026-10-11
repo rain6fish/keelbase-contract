@@ -30,12 +30,12 @@
       "type": ["string", "null"]
     },
     "outcome": {
-      "description": "C-3（v5）：这一次的**结构化结果码**——冻结词表，值即语义，不随实现变。链外列，不入 hash payload。**按 `action` 分组合法**：`tool_call` → `executed`（真执行了，含幂等复用）/ `pending`（已提议、等人裁决，含两人规则）/ `blocked`（风险策略挡下，**没到裁决**）/ `refused`（治理或授权拒绝）/ `declined`（人工拒绝）/ `failed`（执行本身失败）；`tool_confirmation` → `approved`（人工批准）/ `declined` / `pending`；`effect_revoke` → `revoked`（副作用已撤销）。**⚠ `blocked` 与 `refused` 是两道不同的闸**（风险策略 vs 治理/授权），不得合并。**非工具行为 null**（如 `chat` / `knowledge` / `delegate` / `flow_node`），且**不得猜测填充**。",
+      "description": "C-3（v5）：这一次的**结构化结果码**——冻结词表，值即语义，不随实现变。链外列，不入 hash payload。**按 `action` 分组合法**：`tool_call` → `executed`（真执行了，含幂等复用）/ `pending`（已提议、等人裁决，含两人规则）/ `blocked`（风险策略挡下，**没到裁决**）/ `refused`（治理或授权拒绝）/ `declined`（人工拒绝）/ `failed`（执行本身失败）；`tool_confirmation` → `approved`（人工批准）/ `declined` / `pending` / `timeout`（**等待窗口走完、没人裁**——取契约自己 `confirmation-lifecycle-v2` 那个词；不是「拒绝」，也不是失败）；`effect_revoke` → `revoked`（副作用已撤销）。**⚠ `blocked` 与 `refused` 是两道不同的闸**（风险策略 vs 治理/授权），不得合并。**不是关于某一个工具的行为 null**（`chat` / `knowledge` / `delegate` / `flow_node` 这类非工具行，以及一次裁决涉及**多个**工具的行），且**不得猜测填充**。",
       "type": ["string", "null"],
-      "enum": ["executed", "pending", "blocked", "refused", "declined", "failed", "approved", "revoked", null]
+      "enum": ["executed", "pending", "blocked", "refused", "declined", "failed", "approved", "timeout", "revoked", null]
     },
     "tool": {
-      "description": "C-3（v5）：本行所属的**工具名**，取产出方自己的注册名。链外列，不入 hash payload。**非工具行为 null**——不要拿 `detail` 的第一个 token 去凑（两个实现的 `detail` 文法不同：Java 是 `<tool> <动词> …`、NestJS 是 `<tool>(<argsJson>)`；这正是本列要取代的那种解析）。",
+      "description": "C-3（v5）：本行所属的**工具名**，取产出方自己的注册名。链外列，不入 hash payload。**不是关于某一个工具的行为 null**：非工具行（`chat` / `knowledge` / …），以及一次裁决/一次运行涉及**多个**工具的行（如 run 级确认行）。—— 不要拿 `detail` 的第一个 token 去凑（两个实现的 `detail` 文法不同：Java 是 `<tool> <动词> …`、NestJS 是 `<tool>(<argsJson>)`；这正是本列要取代的那种解析）。",
       "type": ["string", "null"]
     },
     "model": { "type": ["string", "null"] },

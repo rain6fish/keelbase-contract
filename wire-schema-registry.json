@@ -357,6 +357,7 @@
         "schemas/v5/samples/ai-audit-log-row-declined.json",
         "schemas/v5/samples/ai-audit-log-row-failed.json",
         "schemas/v5/samples/ai-audit-log-row-approved.json",
+        "schemas/v5/samples/ai-audit-log-row-timeout.json",
         "schemas/v5/samples/ai-audit-log-row-revoked.json"
       ]
     },
