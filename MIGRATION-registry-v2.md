@@ -20,7 +20,7 @@ a `-vN` suffix inside the file name that the real file does not have; v2 names
 | consumer | where |
 |---|---|
 | this repository's own gate | `runner/check-registry-paths.mjs` |
-| the TypeScript line | `Server-NestJS/src/ai/audit/audit-query.service.spec.ts` and what reads beside it |
+| the TypeScript line | **four** specs resolve a `schema` into a path and carry v1's second spelling — `src/ai/audit/audit-query.service.spec.ts` · `src/ai/scenarios-pack.spec.ts` · `src/ai/tool-effects/ai-tool-effects.service.spec.ts` · `src/ai/trace/decision-trace.service.spec.ts`. Four more read the index without resolving a path (`src/ai/failure-semantics.spec.ts` · `src/app-version/capabilities.service.spec.ts` · `src/common/wire-schema/wire-schema.spec.ts` · `src/realtime/realtime.types.spec.ts`) and need nothing |
 | the Java line | `keelbase4j-protocol/.../WireSchemas.java`, documented in `PermissionWireTest` |
 
 **Moved so far:** this repository's own gate, on 2026-10-12 — it reads v2, and the rule-B branch and the
@@ -63,7 +63,7 @@ working exactly as it does today, readings and allowances included.
 | 消费方 | 位置 |
 |---|---|
 | 本仓自己的门 | `runner/check-registry-paths.mjs` |
-| TypeScript 线 | `Server-NestJS/src/ai/audit/audit-query.service.spec.ts` 及其旁边的读法 |
+| TypeScript 线 | **四个** spec 会把 `schema` 解析成路径、且带着 v1 的第二套写法 —— `src/ai/audit/audit-query.service.spec.ts` · `src/ai/scenarios-pack.spec.ts` · `src/ai/tool-effects/ai-tool-effects.service.spec.ts` · `src/ai/trace/decision-trace.service.spec.ts`。另有四个只读索引、不解析路径（`src/ai/failure-semantics.spec.ts` · `src/app-version/capabilities.service.spec.ts` · `src/common/wire-schema/wire-schema.spec.ts` · `src/realtime/realtime.types.spec.ts`），**什么都不用改** |
 | Java 线 | `keelbase4j-protocol/.../WireSchemas.java`，`PermissionWireTest` 里有说明 |
 
 **已经动了谁：** 本仓自己那道门，2026-10-12 —— 它读 v2，B 规则那段与那两条的 allowlist 一并删掉了。
