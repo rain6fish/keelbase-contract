@@ -5,6 +5,76 @@
 
 ---
 
+## v1.8.0 — 2026-10-12
+
+**MINOR — the registry gains a second index with one encoding, and the paths gate stops carrying an allowance.**
+
+**What changed**
+
+`wire-schema-registry-v2.json` is the same index with one thing settled: how `objects[].schema` is
+written. It is now always the bare file name, resolved as `schemas/<version>/<schema>` with the entry's
+own `version` beside it. Eight entries carried the `vN/` segment inside the name **as well as** in
+`version`; v2 writes it once.
+
+Two entries stop naming files that are not on disk. `sse-event` and `confirmation-request` carried a
+`-vN` suffix inside the file name that the real files do not have; v2 names `sse-event.schema.json` and
+`confirmation-request.schema.json`, which is what is there. That half is a correction, not an encoding
+choice.
+
+`MIGRATION-registry-v2.md` is the page a consumer works from: it says what moved, who reads the index
+today, and in which order the move happens. Its consumer list names the four TypeScript specs that
+resolve a `schema` into a path, and the four more that read the index without resolving one.
+
+**Why**
+
+A field with two spellings is a rule the reader has to know twice, and it bought nothing: the version
+was already beside the name. Worse, two of the entries had been resolving to nothing for nineteen days
+and nobody noticed, because no runner read that field — the runtime keys schemas by `$id` and the
+conformance runner reads vectors. A gate over that field was added in `v1.7.0`; it could not be a gate
+while it had a frozen allowance to carry, and the allowance could not go until the encoding was settled.
+
+**Why this is a MINOR and not furniture**
+
+The version line follows the schemas, the vectors and `wire-schema-registry.json` — see *Versioning* in
+the README — and a second registry index is on that line. It is additive in the way the rule asks for:
+v1 is unchanged, nothing obliges a consumer to move, the contract's schemas are untouched, and no
+reading anybody reproduces comes out differently. The builder and the migration page under `runner/` are
+furniture by that same rule and would warrant nothing on their own; the gate's move to v2 is furniture
+too, and is recorded here because it is what the version-line change was for.
+
+---
+
+**MINOR —— registry 多了一份只用一种编码的索引，路径那道闸也卸下了它的豁免。**
+
+**改了什么**
+
+`wire-schema-registry-v2.json` 与 v1 是同一份索引，只把一件事定死：`objects[].schema` 怎么写。它现在
+**一律是裸文件名**，按 `schemas/<version>/<schema>` 解析，版本由条目自己的 `version` 带。**八条**既把
+`vN/` 写进文件名、又写进 `version`；v2 只写一次。
+
+**两条**不再指着一个磁盘上不存在的文件。`sse-event` 与 `confirmation-request` 的文件名里带了个真文件
+没有的 `-vN` 后缀；v2 写的是 `sse-event.schema.json` 与 `confirmation-request.schema.json`，也就是**实存
+的那两个**。这半边是**改错**，不是选编码。
+
+`MIGRATION-registry-v2.md` 是消费方照它做的那一页：写清改了什么、今天谁在读这份索引、以及按什么顺序迁。
+它的消费方表点了**四个**会把 `schema` 解析成路径的 TS spec，以及另**四个**只读索引、不解析路径的。
+
+**为什么**
+
+一个字段有两种写法，就是让读的人**多背一条规则**，而它什么也买不到：版本本来就写在名字旁边。更糟的是，
+那两条**已经指向不存在的东西十九天**而无人在意 —— 因为**没有任何 runner 读那个字段**（运行时按 `$id`
+建索引、conformance runner 读的是语料）。覆盖该字段的闸是在 `v1.7.0` 加的；**只要它还背着一条冻结的豁免，
+它就成不了闸**，而那条豁免在编码定下来之前去不掉。
+
+**为什么这是 MINOR、不是家具**
+
+版本线跟的是 schema、向量与 `wire-schema-registry.json`（见 README《版本与演进》），而**第二份 registry
+索引就在这条线上**。它按那条规则要的**加性**方式加的：v1 一字未动、**没有任何一条要求消费方必须迁**、
+契约的 schema 未被触碰、**任何人复现出的读数都不会不同**。`runner/` 下的构建器与迁移页按同一条规则属
+**家具**，单凭它们**不占版本号**；那道闸改读 v2 同属家具，记在这里只因为它是这次版本线改动**为了什么**。
+
+---
+
 ## v1.7.0 — 2026-10-11
 
 **MINOR — an audit row says what happened without anyone parsing its prose, the tenant becomes a dimension of its own, and the registry's paths get a gate.**
