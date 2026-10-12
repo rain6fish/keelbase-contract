@@ -2,50 +2,39 @@
 
 // SPDX-License-Identifier: Apache-2.0
 /**
- * Registry path resolution — a **report-only** check.
+ * Registry path resolution — every `objects[].schema` must name a file that is on disk.
  *
- * `wire-schema-registry.json` is the index from a contract id to the schema file its wire shape is
- * frozen in. Its `objects[].schema` is written two ways, and two entries point at files that are not
- * on disk:
- *
- *   rule A  `schema` is a bare name and the object carries a `version` ⇒ schemas/<version>/<schema>
- *   rule B  `schema` already carries its `vN/` segment               ⇒ schemas/<schema>
- *   neither `sse-event` / `confirmation-request` name a `-vN` suffixed file that does not exist
- *           (the real files drop the suffix).
+ * The index is `wire-schema-registry-v2.json`, where `schema` is written **one way**: a bare file name,
+ * resolved as `schemas/<version>/<schema>` with the entry's own `version` beside it. v1 carried two
+ * encodings and two entries naming files that do not exist; both are settled in v2 (see
+ * `MIGRATION-registry-v2.md`), so nothing here is allowlisted any more.
  *
  * Nothing else checks this: `verify-full-profile.mjs` keys schemas by their `$id`, not by this field,
- * and `verify-protocol-conformance.mjs` reads vectors. So the two broken entries have sat here unseen.
- * Fixing them is a contract change and is tracked as ADR-0007 §3 Q10, so they are **allowlisted** here
- * as frozen debt rather than silently ignored.
+ * and `verify-protocol-conformance.mjs` reads vectors. That is why the two broken entries in v1 sat
+ * unseen for nineteen days.
  *
- * This check **reports** every entry it cannot resolve and separates the known debt from anything new.
- * It is report-only: it exits 0 either way. `--strict` exits 1 on any unresolved entry that is not the
- * frozen debt — the gate to switch on once Q10 lands.
+ * Report-only by default; `--strict` exits 1 on any unresolved entry. The remaining consumers move to
+ * v2 before the strict form is switched on in `package.json` — see `MIGRATION-registry-v2.md`.
  *
  * Usage:  node runner/check-registry-paths.mjs            # report-only, always exit 0
- *         node runner/check-registry-paths.mjs --strict   # exit 1 on new breakage
+ *         node runner/check-registry-paths.mjs --strict   # exit 1 on any unresolved entry
  *
  * ── 中文 ────────────────────────────────────────────────────────────────────────
  *
- * **registry 路径解析 —— 一条「只报告」的检查。**
+ * **registry 路径解析 —— 每条 `objects[].schema` 都必须指向一个实存文件。**
  *
- * `wire-schema-registry.json` 是「契约 id → 该 wire 形状冻结在哪个 schema 文件」的索引。它的
- * `objects[].schema` 被写成两种编码，且有两条指着一个磁盘上不存在的文件：
- *
- *   规则 A  `schema` 是裸名、对象另带 `version` ⇒ schemas/<version>/<schema>
- *   规则 B  `schema` 自带 `vN/` 段             ⇒ schemas/<schema>
- *   两条都不命中 `sse-event` / `confirmation-request` 写了一个带 `-vN` 后缀、并不存在的文件
- *              （真文件不带该后缀）。
+ * 索引是 `wire-schema-registry-v2.json`，其中 `schema` **只有一种写法**：裸文件名，按
+ * `schemas/<version>/<schema>` 解析，版本由条目自己的 `version` 带。v1 有两种编码、且两条指向不存在的
+ * 文件；两者都在 v2 里定下了（见 `MIGRATION-registry-v2.md`），**故这里不再有任何 allowlist**。
  *
  * 除此之外没有东西查这一点：`verify-full-profile.mjs` 按 schema 的 `$id` 建索引、**不读**这个字段，
- * `verify-protocol-conformance.mjs` 读的是语料。故那两条破损一直无人看见。修它属契约改动，记作
- * ADR-0007 §3 **Q10** —— 所以这里把它们**显式 allowlist** 为冻结的债，而不是无声放过。
+ * `verify-protocol-conformance.mjs` 读的是语料。这正是 v1 里那两条破损躺了十九天无人看见的原因。
  *
- * 本检查**报告**每一条解析不出的条目，并把「已知的债」与「新出现的」分开。它是**只报告**的：无论
- * 如何都退出 0。`--strict` 会在**非冻结债**的解析失败上退出 1 —— 那是 Q10 落地后要打开的门。
+ * 默认**只报告**；`--strict` 对**任何**解析不出的条目退 1。其余消费方先迁到 v2，
+ * `package.json` 里那步再换 strict —— 见 `MIGRATION-registry-v2.md`。
  *
  * 用法：node runner/check-registry-paths.mjs            # 只报告，恒退 0
- *       node runner/check-registry-paths.mjs --strict   # 新破损即退 1
+ *       node runner/check-registry-paths.mjs --strict   # 任何解析不出即退 1
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
@@ -54,67 +43,40 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..'); // the contract itself is this repository's root / 契约本身就是本仓根
 
-/**
- * Frozen debt: registry ids whose `schema` names a file that is not on disk. Fixing them is a contract
- * change (ADR-0007 §3 Q10), so they are named here instead of silenced. Remove an id once Q10 lands.
- *
- * 冻结的债：`schema` 指着一个磁盘上不存在的文件的 registry id。修它属契约改动（ADR-0007 §3 Q10），
- * 故在此点名、而不是无视。Q10 落地后逐条移除。
- */
-const KNOWN_DEBT = new Map([
-  ['sse-event', 'names `sse-event-v2.schema.json`; the file is `schemas/v2/sse-event.schema.json`'],
-  ['confirmation-request', 'names `confirmation-request-v3.schema.json`; the file is `schemas/v3/confirmation-request.schema.json`'],
-]);
-
+const REGISTRY = 'wire-schema-registry-v2.json';
 const STRICT = process.argv.slice(2).includes('--strict');
 
-const registry = JSON.parse(readFileSync(join(ROOT, 'wire-schema-registry.json'), 'utf8'));
+const registry = JSON.parse(readFileSync(join(ROOT, REGISTRY), 'utf8'));
 const schemasRoot = resolve(ROOT, registry.schemasDir);
 const objects = registry.objects;
 
-let ruleA = 0;
-let ruleB = 0;
 const unresolved = [];
 for (const obj of objects) {
-  const schema = obj.schema;
-  const candidates = [];
-  if (schema.includes('/')) candidates.push(join(schemasRoot, schema)); // rule B / 规则 B
-  if (obj.version) candidates.push(join(schemasRoot, String(obj.version), schema)); // rule A / 规则 A
-  if (candidates.some((p) => existsSync(p))) {
-    if (schema.includes('/')) ruleB++; else ruleA++;
-  } else {
-    unresolved.push({ id: obj.id, schema, tried: candidates });
+  // One rule: the bare name under the entry's own version. A `schema` that carries a `vN/` segment —
+  // v1's second encoding — now simply fails to resolve, which is the point of having one rule.
+  // 只有一条规则：裸名落在该条目自己的版本目录下。带 `vN/` 段的那种写法（v1 的第二套编码）现在**解析不出**，
+  // 而这正是一套规则的意义。
+  const path = join(schemasRoot, String(obj.version), obj.schema);
+  if (!existsSync(path)) {
+    unresolved.push({ id: obj.id, schema: obj.schema, tried: path });
   }
 }
 
-const newBreakage = unresolved.filter((u) => !KNOWN_DEBT.has(u.id));
-const debtHit = unresolved.filter((u) => KNOWN_DEBT.has(u.id));
-// An allowlisted id that now resolves is not a problem — Q10 may have fixed it. Report it so the
-// allowlist can be pruned. / 已 allowlist 的 id 现在能解析了，不是问题 —— Q10 可能已修好它；报出来好清 allowlist。
-const resolvedDebt = [...KNOWN_DEBT.keys()].filter(
-  (id) => !unresolved.some((u) => u.id === id) && objects.some((o) => o.id === id),
-);
-const goneDebt = [...KNOWN_DEBT.keys()].filter((id) => !objects.some((o) => o.id === id));
-
-console.log('═══ registry 路径解析（report-only）═══');
-console.log(`  registry: ${objects.length} objects · 规则 A ${ruleA} · 规则 B ${ruleB} · 解析不出 ${unresolved.length}`);
+console.log(`═══ registry 路径解析（${STRICT ? 'strict' : 'report-only'}）═══`);
+console.log(`  registry: ${REGISTRY} · ${objects.length} objects · registryVersion ${registry.registryVersion}`);
 
 for (const u of unresolved) {
-  const isDebt = KNOWN_DEBT.has(u.id);
-  console.log(`  ${isDebt ? '•' : '✗'} ${u.id} -> ${u.schema}${isDebt ? '   [冻结的债 · Q10]' : '   [新破损！]'}`);
-  for (const p of u.tried) console.log(`       tried: ${p.replace(ROOT, '.').replace(/\\/g, '/')}`);
+  console.log(`  ✗ ${u.id} -> ${u.schema}`);
+  console.log(`       tried: ${u.tried.replace(ROOT, '.').replace(/\\/g, '/')}`);
 }
-if (resolvedDebt.length) console.log(`  ℹ 可清出 allowlist（现已解析）：${resolvedDebt.join(', ')}`);
-if (goneDebt.length) console.log(`  ℹ allowlist 里这些 id 已不在 registry：${goneDebt.join(', ')}`);
 
-if (newBreakage.length === 0) {
-  console.log(`✓ 无新破损（冻结的债 ${debtHit.length} 条 · 见 ADR-0007 §3 Q10）`);
+if (unresolved.length === 0) {
+  console.log('✓ 每条 schema 都解析到实存文件');
 } else {
-  console.log(`✗ 新破损 ${newBreakage.length} 条：${newBreakage.map((u) => u.id).join(', ')}`);
+  console.log(`✗ 解析不出 ${unresolved.length} 条：${unresolved.map((u) => u.id).join(', ')}`);
 }
 
-// Report-only by default: the frozen debt is not a reason to go red, and a new breakage is reported
-// either way. `--strict` turns a new breakage into a non-zero exit — the gate for after Q10.
-// 默认只报告：冻结的债不该让门变红，而新破损无论哪种模式都会被报出来。`--strict` 把新破损变成非零退出码
-// —— 那是 Q10 之后要打开的门。
-if (STRICT && newBreakage.length > 0) process.exit(1);
+// Report-only by default so this can be read before it is a gate; `--strict` is the form `package.json`
+// switches to once the consumers have moved.
+// 默认只报告，好让它在成为门之前先能被读；消费方迁完之后，`package.json` 换的就是 `--strict` 那一档。
+if (STRICT && unresolved.length > 0) process.exit(1);

@@ -23,6 +23,10 @@ a `-vN` suffix inside the file name that the real file does not have; v2 names
 | the TypeScript line | `Server-NestJS/src/ai/audit/audit-query.service.spec.ts` and what reads beside it |
 | the Java line | `keelbase4j-protocol/.../WireSchemas.java`, documented in `PermissionWireTest` |
 
+**Moved so far:** this repository's own gate, on 2026-10-12 — it reads v2, and the rule-B branch and the
+two-entry allowlist are gone with it. The TypeScript and Java lines have **not** moved; the strict form
+in `package.json` stays off until they have.
+
 ## What to do
 
 1. Point the constant at `wire-schema-registry-v2.json`.
@@ -61,6 +65,9 @@ working exactly as it does today, readings and allowances included.
 | 本仓自己的门 | `runner/check-registry-paths.mjs` |
 | TypeScript 线 | `Server-NestJS/src/ai/audit/audit-query.service.spec.ts` 及其旁边的读法 |
 | Java 线 | `keelbase4j-protocol/.../WireSchemas.java`，`PermissionWireTest` 里有说明 |
+
+**已经动了谁：** 本仓自己那道门，2026-10-12 —— 它读 v2，B 规则那段与那两条的 allowlist 一并删掉了。
+**TS 线与 Java 线都还没动**；`package.json` 里那档 strict 在它们动完之前**不开**。
 
 ## 要做什么
 
