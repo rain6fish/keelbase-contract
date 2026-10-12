@@ -32,7 +32,18 @@ in `package.json` stays off until they have.
 1. Point the constant at `wire-schema-registry-v2.json`.
 2. Delete any rule-B handling and any special case for the two entries above — both exist only because
    of v1.
-3. `runner/check-registry-paths.mjs --strict` is the gate to switch on **after** the consumers have
+3. **If you pick the contract up by file name rather than checking it out whole, widen the pattern.**
+   A snapshot taken with a literal `wire-schema-registry.json` does not match `-v2`, and the drift check
+   beside it then reports no drift while being blind to the file — measured on the Java line's
+   `sync-vectors.sh`, whose `--check` read "190 files, no drift" after the pin moved. The pattern has to
+   become `wire-schema-registry*.json` **in every place that enumerates the snapshot at once**: widening
+   only the pickup leaves the extra file never reported as extra.
+4. **⚠ If you key by `$id`, read it out of the file.** In v1 this field held the schema's own `$id`, and
+   an `$id` is not always the file name here — `sse-event.schema.json` carries
+   `sse-event-v2.schema.json`, and `side-effect-revoke` carries `v2/…`. For a consumer that used the
+   field as an `$id`, v2 is therefore **not the same index**: it will land on another version's file
+   without saying so. Resolve the path from `version` + `schema`, then read `$id` from the file.
+5. `runner/check-registry-paths.mjs --strict` is the gate to switch on **after** the consumers have
    moved: against v2 it has nothing left to allowlist.
 
 ## What did not change
@@ -73,7 +84,16 @@ working exactly as it does today, readings and allowances included.
 
 1. 常量改指 `wire-schema-registry-v2.json`。
 2. 删掉任何 B 规则的兼容代码、以及上面那两条的特例 —— 两者都只因 v1 而存在。
-3. `runner/check-registry-paths.mjs --strict` 是**消费方迁完之后**才开的那道门：对着 v2，它没有债可 allowlist。
+3. **若你是按文件名把契约「拾」过来的**（而不是整棵检出），**要把拾取模式放宽**。用字面
+   `wire-schema-registry.json` 取的快照**匹配不到 `-v2`**，旁边那道漂移门于是**对它是瞎的**、却报「无漂移」
+   —— 这是在 Java 线的 `sync-vectors.sh` 上实测到的：抬 pin 之后它的 `--check` 仍读作「190 文件、无漂移」。
+   模式要变成 `wire-schema-registry*.json`，**且所有枚举这份快照的地方要一起改**：只放宽拾取，多出来的那个
+   文件**永远不会被报成 extra**。
+4. **⚠ 若你按 `$id` 取用，请从文件里读它。** v1 那个字段装的是 schema 自己的 **`$id`**，而这里的 `$id`
+   **不总等于文件名** —— `sse-event.schema.json` 的是 `sse-event-v2.schema.json`，`side-effect-revoke` 的是
+   `v2/…`。对**把该字段当 `$id` 用**的消费方，v2 因此**不是同一份索引**：它会**静默落到另一个版本的文件**上。
+   做法：**由 `version` + `schema` 拼出路径解析**，再**从文件里读 `$id`**。
+5. `runner/check-registry-paths.mjs --strict` 是**消费方迁完之后**才开的那道门：对着 v2，它没有债可 allowlist。
 
 ## 没有改变的东西
 
