@@ -21,7 +21,13 @@
  * `MIGRATION-registry-v2.md` describes. The registry carries its own `registryVersion`, so this is not
  * a change to the contract's version line.
  *
- *   node runner/build-registry-v2.mjs
+ * It has a `--check` mode, and `npm run check` runs that mode: v2 is a **generated** file that is
+ * committed, so the one thing that must not happen is v1 moving while v2 quietly stays where it was.
+ * `--check` rebuilds in memory and compares text, so a hand-edit anywhere — not only a stale `schema` —
+ * is caught.
+ *
+ *   node runner/build-registry-v2.mjs           # write
+ *   node runner/build-registry-v2.mjs --check   # exit 1 unless the committed file is what a rebuild gives
  *
  * 写出 `wire-schema-registry-v2.json` —— 同一份索引，`objects[].schema` 只用一种编码。
  *
@@ -39,7 +45,12 @@
  * **加性**：v1 一字不动，也还没有消费方用 v2 —— 迁移是 `MIGRATION-registry-v2.md` 说的事。registry 有它自己的
  * `registryVersion`，故这**不是**对契约版本线的改动。
  *
- *   node runner/build-registry-v2.mjs
+ * 它有一个 `--check` 模式，而 `npm run check` 跑的就是它：v2 是**生成物**、又**入库**，故最不该发生的一件事就是
+ * **v1 动了、v2 悄悄留在原处**。`--check` 在内存里重建并**按文本**比对，所以**任何**手改（不只是过期的
+ * `schema`）都会被抓到。
+ *
+ *   node runner/build-registry-v2.mjs           # 写入
+ *   node runner/build-registry-v2.mjs --check   # 提交那份不等于重建结果就退 1
  */
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -48,6 +59,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const V1 = join(ROOT, 'wire-schema-registry.json');
 const V2 = join(ROOT, 'wire-schema-registry-v2.json');
+
+const CHECK = process.argv.slice(2).includes('--check');
 
 const v1 = JSON.parse(readFileSync(V1, 'utf8'));
 const missing = [];
@@ -86,5 +99,31 @@ const v2 = {
   objects,
 };
 
-writeFileSync(V2, `${JSON.stringify(v2, null, 2)}\n`);
+const rendered = `${JSON.stringify(v2, null, 2)}\n`;
+
+if (CHECK) {
+  const onDisk = existsSync(V2) ? readFileSync(V2, 'utf8') : null;
+  if (onDisk === rendered) {
+    console.log(`✓ wire-schema-registry-v2.json is what a rebuild of v1 gives — ${objects.length} objects, one encoding (rule A)`);
+    process.exit(0);
+  }
+  console.error('✗ wire-schema-registry-v2.json is not what a rebuild of v1 gives:');
+  if (onDisk === null) {
+    console.error('  the file is missing — run: node runner/build-registry-v2.mjs');
+  } else {
+    // Name the first line that differs, so the message points at something rather than saying "different".
+    // 点名**第一处不同**的那一行，好让信息指出一个位置，而不是只说「不一样」。
+    const a = onDisk.split('\n');
+    const b = rendered.split('\n');
+    let i = 0;
+    while (i < Math.max(a.length, b.length) && a[i] === b[i]) i += 1;
+    console.error(`  first difference at line ${i + 1}:`);
+    console.error(`    on disk: ${a[i] ?? '(end of file)'}`);
+    console.error(`    rebuild: ${b[i] ?? '(end of file)'}`);
+    console.error('  if v1 changed on purpose, rebuild: node runner/build-registry-v2.mjs');
+  }
+  process.exit(1);
+}
+
+writeFileSync(V2, rendered);
 console.log(`wrote wire-schema-registry-v2.json — ${objects.length} objects, one encoding (rule A)`);
