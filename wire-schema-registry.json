@@ -201,22 +201,22 @@
     },
     {
       "id": "conversation-data",
-      "version": "v1",
-      "schema": "conversation-data.schema.json",
-      "title": "AI 会话视图 ConversationData + Message（role 枚举）",
-      "source": "src/ai/conversation/conversation.service.ts:23-38,202-222",
+      "version": "v2",
+      "schema": "v2/conversation-data.schema.json",
+      "title": "AI 会话视图 ConversationData + Message（role 枚举；v2：加可选 title + messageCount，加性）",
+      "source": "src/ai/conversation/conversation.service.ts toData",
       "samples": [
-        "schemas/v1/samples/conversation-data.json"
+        "schemas/v2/samples/conversation-data.json"
       ]
     },
     {
       "id": "conversation-meta",
-      "version": "v1",
-      "schema": "conversation-meta.schema.json",
-      "title": "AI 会话元数据（AU-4 下钻第一步；**不含任何消息文本**，正文另请 /conversations/:id）",
+      "version": "v2",
+      "schema": "v2/conversation-meta.schema.json",
+      "title": "AI 会话元数据（AU-4 下钻第一步；**不含任何消息文本**，正文另请 /conversations/:id；v2：加可选 title，加性）",
       "source": "src/ai/conversation/conversation.service.ts getConversationMeta; src/ai/ai.controller.ts",
       "samples": [
-        "schemas/v1/samples/conversation-meta.json"
+        "schemas/v2/samples/conversation-meta.json"
       ]
     },
     {
