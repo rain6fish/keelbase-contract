@@ -5,7 +5,48 @@
 
 ---
 
-## v1.8.0 — 2026-10-12
+## v1.9.0 — 2026-10-13
+
+**MINOR — the conversation views learn a name and a count, and both are optional.**
+
+**What changed**
+
+`conversation-data` moves to **v2**, gaining two optional fields: `title` (a name the user gave the
+conversation) and `messageCount`. `conversation-meta` moves to **v2**, gaining `title` alone.
+`required` is unchanged in both, so a v1-shaped payload is still valid and the frozen v1 samples still
+validate against the v2 schemas. The v1 schemas and samples stay in `schemas/v1/` as frozen history.
+
+Untouched: the `role` enum, the derived `timestamp`, and the deliberate shape of `conversation-meta` —
+it still carries no message text, neither `messages` nor `summary`.
+
+**Why**
+
+The web workbench turns the assistant into the landing surface and lists recent conversations as a
+**work ledger**. Each row wants a name the user chose and a message count, and neither could be added
+without writing the shape down first: the registry is the single source of what a conversation view
+*is*, and a consumer binds to it. Both fields are additive in the way the rule asks for — nothing
+obliges a consumer to move — and an absent `title` stays absent rather than becoming a sentinel, so a
+conversation with no name stays distinguishable from one named "".
+
+**MINOR —— 会话视图各得一个名字与一个条数，两者都可选。**
+
+**改了什么**
+
+`conversation-data` 升到 **v2**，加两个可选字段：`title`（用户给会话起的名字）与 `messageCount`。
+`conversation-meta` 升到 **v2**，只加 `title`。两者的 `required` 都不变，故 v1 形态的载荷仍然合法、
+冻结的 v1 样例也照旧通过 v2 的校验。v1 的 schema 与样例留在 `schemas/v1/` 作为冻结历史。
+
+未动：`role` 枚举、派生的 `timestamp`，以及 `conversation-meta` 刻意保持的形状——它仍不含任何消息
+文本，既无 `messages` 也无 `summary`。
+
+**为什么**
+
+Web 工作台把助手变成落地页，并把最近的会话列成**工作账本**。每一行想要一个用户自己起的名字和一个
+消息条数，而这两样必须先写进形状里：注册表是「会话视图**是什么**」的唯一真源，消费方绑的就是它。
+两个字段都是规则所要求的**加性**变更——没有谁被迫跟进——且未设的 `title` 保持**缺席**而不是变成哨兵，
+故「没有名字的会话」与「名字是空串的会话」仍然分得开。
+
+
 
 **MINOR — the registry gains a second index with one encoding, and the paths gate stops carrying an allowance.**
 
