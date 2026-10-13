@@ -5,6 +5,83 @@
 
 **本仓不隶属于任何实现。** TS runtime 与 Java runtime 各自**平行**消费它——两者都只是消费者，**没有任何一个实现有权单方面改动它**。协议语义的源在本仓；实现跟随契约，而不是契约跟随某一个实现。
 
+<!-- BEGIN keelbase-family:en sha256:2b814db6cf768ed2e451305808a7a612049519af49310cef56ce7a5bc97bad2c -->
+## 🧬 The KeelBase family
+
+> KeelBase is **one protocol with several implementations and hosts** — not a set of competing
+> products. The contract is the source of truth; runtimes and hosts consume it, and none of them
+> owns it. Every repository here is **Apache-2.0**.
+
+```text
+  host adapters   KeelBase-YuDao
+                  └ governance added to a mature enterprise platform (yudao)
+
+  runtimes        KeelBase (TypeScript)   ·   KeelBase4J (Java / Spring)
+                  └ two carriers of the same protocol — peers, not translations
+
+  bridge          KeelBase-java-starter
+                  └ wire an existing Java/Spring system in as governed AI tools
+
+  contract        keelbase-contract
+                  └ wire schemas + conformance vectors + the version line they share
+```
+
+| Repository | Role | Stack | Status |
+|---|---|---|---|
+| [`KeelBase`](https://github.com/rain6fish/KeelBase) | Reference implementation · product documentation · demo | TypeScript · NestJS · Vue · Flutter · Taro | active |
+| [`KeelBase4J`](https://github.com/rain6fish/KeelBase4J) | The Java carrier of the same protocol | Java 17 · Spring Boot | active |
+| [`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) | Wire an existing Java/Spring system in as governed AI tools | Maven · Gradle | 0.1.x |
+| [`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) | Host adapter — the governance layer on a yudao platform | Java · Vue 3 | active |
+| [`keelbase-contract`](https://github.com/rain6fish/keelbase-contract) | The protocol itself — schemas, vectors, the version line | JSON Schema | v1.x |
+
+**Where to start** — see it run: [`KeelBase`](https://github.com/rain6fish/KeelBase) (60-second
+Docker) · make an existing Java system AI-capable:
+[`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) · you already run yudao:
+[`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) · implement the protocol:
+[`keelbase-contract`](https://github.com/rain6fish/keelbase-contract).
+
+Which contract version each runtime answers for is maintained **once**, in the main repository — see
+[Compatibility](https://github.com/rain6fish/KeelBase#-compatibility). It is not duplicated here.
+<!-- END keelbase-family:en -->
+
+<!-- BEGIN keelbase-family:zh sha256:71b3f61e591ebb6fe93043059b0e22041d60492f0e6bc804ecc44759bef4312f -->
+## 🧬 KeelBase 家族
+
+> KeelBase 是**一套协议、多个实现与多种宿主**——不是几个互相竞争的产品。契约是唯一真源，
+> 各 runtime 与各宿主消费它，**谁也不拥有它**。这里每个仓都是 **Apache-2.0**。
+
+```text
+  宿主适配   KeelBase-YuDao
+             └ 在成熟企业平台上补治理层（芋道）
+
+  runtime    KeelBase（TypeScript）  ·  KeelBase4J（Java / Spring）
+             └ 同一协议的两个载体——互为平行，不是翻译关系
+
+  桥接       KeelBase-java-starter
+             └ 把存量 Java/Spring 系统接成受治理的 AI 工具
+
+  契约       keelbase-contract
+             └ 线缆 schema + 一致性向量 + 两者共用的版本线
+```
+
+| 仓 | 角色 | 技术栈 | 状态 |
+|---|---|---|---|
+| [`KeelBase`](https://github.com/rain6fish/KeelBase) | 参考实现 · 产品文档 · 演示 | TypeScript · NestJS · Vue · Flutter · Taro | 活跃 |
+| [`KeelBase4J`](https://github.com/rain6fish/KeelBase4J) | 同一协议的 Java 载体 | Java 17 · Spring Boot | 活跃 |
+| [`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) | 把存量 Java/Spring 系统接成受治理的 AI 工具 | Maven · Gradle | 0.1.x |
+| [`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) | 宿主适配——芋道平台上的治理层 | Java · Vue 3 | 活跃 |
+| [`keelbase-contract`](https://github.com/rain6fish/keelbase-contract) | 协议本体——schema、向量、版本线 | JSON Schema | v1.x |
+
+**从哪里开始** —— 想看它跑起来：[`KeelBase`](https://github.com/rain6fish/KeelBase)（60 秒
+Docker）· 想让存量 Java 系统具备 AI 能力：
+[`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) · 你已经在用芋道：
+[`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) · 想实现这个协议：
+[`keelbase-contract`](https://github.com/rain6fish/keelbase-contract)。
+
+每个 runtime 对着哪一版契约应答，**只在主仓维护一处**——见
+[兼容矩阵](https://github.com/rain6fish/KeelBase/blob/main/README.zh-CN.md#-兼容矩阵)。此处不重复。
+<!-- END keelbase-family:zh -->
+
 ## 目录 / Layout
 
 ```
@@ -102,10 +179,9 @@ canonical 的嵌套边界语义以 `canonical-json-v1-vector.json` 为准。
 
 ## 关联仓库 / Related repositories
 
-| 仓 | 角色 |
-|---|---|
-| `rain6fish/KeelBase` | TS runtime（消费者） |
-| `rain6fish/KeelBase4J` | Java runtime（消费者） |
-| `rain6fish/KeelBase-java-starter` | Java 接入层，Spring Boot Starter |
+Every repository in the family, with its role and status, is listed in the **KeelBase family** section
+at the top of this file. The relationship is **parallel**: the protocol lives here; each implementation
+and its test fixtures live in their own repository.
 
-三个仓与本仓**平行**：协议在本仓，实现与各自的测试夹具在各自仓。
+家族各仓（角色 · 技术栈 · 状态）见本文开头的 **「KeelBase 家族」** 段。关系是**平行**的：协议在本仓；
+各实现与各自的测试夹具在各自仓。
