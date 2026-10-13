@@ -9,7 +9,7 @@
     "url": "https://github.com/rain6fish/keelbase-contract.git"
   },
   "scripts": {
-    "check": "npm run check:schema && npm run check:protocol && npm run check:registry-v2 && npm run check:registry-paths",
+    "check": "npm run check:schema && npm run check:protocol && npm run check:registry-v2 && npm run check:registry-paths:strict",
     "check:schema": "node runner/verify-full-profile.mjs --offline-only",
     "check:protocol": "node runner/verify-protocol-conformance.mjs",
     "check:registry-v2": "node runner/build-registry-v2.mjs --check",

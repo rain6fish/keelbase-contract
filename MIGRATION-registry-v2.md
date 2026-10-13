@@ -23,10 +23,11 @@ a `-vN` suffix inside the file name that the real file does not have; v2 names
 | the TypeScript line | **four** specs resolve a `schema` into a path and carry v1's second spelling — `src/ai/audit/audit-query.service.spec.ts` · `src/ai/scenarios-pack.spec.ts` · `src/ai/tool-effects/ai-tool-effects.service.spec.ts` · `src/ai/trace/decision-trace.service.spec.ts`. Four more read the index without resolving a path (`src/ai/failure-semantics.spec.ts` · `src/app-version/capabilities.service.spec.ts` · `src/common/wire-schema/wire-schema.spec.ts` · `src/realtime/realtime.types.spec.ts`) and need nothing |
 | the Java line | `keelbase4j-protocol/.../WireSchemas.java`, documented in `PermissionWireTest` |
 
-**Moved so far:** this repository's own gate, on 2026-10-12 — it reads v2, and the rule-B branch and the
-two-entry allowlist are gone with it — and the **Java line**, which took the pin, widened its snapshot
-pickup pattern, moved the constant and dropped its rule-B branch. The **TypeScript line is prepared but
-not landed**. The strict form in `package.json` stays off until it is.
+**Moved so far:** all three. This repository's own gate reads v2, and the rule-B branch and the two-entry
+allowlist are gone with it. The **Java line** took the pin, widened its snapshot pickup pattern, moved its
+constant and dropped its rule-B branch. The **TypeScript line** landed on 2026-10-13 — the pin moved to
+this release and the nine places that read the index resolve by path. **The strict form is on**
+(`package.json` runs `check:registry-paths:strict`), which is what it was waiting for.
 
 ## What to do
 
@@ -78,9 +79,10 @@ working exactly as it does today, readings and allowances included.
 | TypeScript 线 | **四个** spec 会把 `schema` 解析成路径、且带着 v1 的第二套写法 —— `src/ai/audit/audit-query.service.spec.ts` · `src/ai/scenarios-pack.spec.ts` · `src/ai/tool-effects/ai-tool-effects.service.spec.ts` · `src/ai/trace/decision-trace.service.spec.ts`。另有四个只读索引、不解析路径（`src/ai/failure-semantics.spec.ts` · `src/app-version/capabilities.service.spec.ts` · `src/common/wire-schema/wire-schema.spec.ts` · `src/realtime/realtime.types.spec.ts`），**什么都不用改** |
 | Java 线 | `keelbase4j-protocol/.../WireSchemas.java`，`PermissionWireTest` 里有说明 |
 
-**已经动了谁：** 本仓自己那道门（2026-10-12 —— 它读 v2，B 规则那段与那两条的 allowlist 一并删掉），
-以及 **Java 线**（抬 pin · 放宽快照拾取模式 · 常量改指 v2 · 删掉它的 B 规则分支）。**TS 线已备好、尚未落地**。
-`package.json` 里那档 strict 在它落地之前**不开**。
+**已经动了谁：三处都动了。** 本仓自己那道门读 v2，B 规则那段与那两条的 allowlist 一并删掉。**Java 线**抬了
+pin、放宽了快照拾取模式、常量改指 v2、删掉它的 B 规则分支。**TS 线**于 2026-10-13 落地 —— pin 前进到这次
+发版，读这份索引的九处都改按路径解析。**那档 strict 已经开了**（`package.json` 跑的就是
+`check:registry-paths:strict`），它等的正是这一刻。
 
 ## 要做什么
 
