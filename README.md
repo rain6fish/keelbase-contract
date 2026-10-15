@@ -193,3 +193,50 @@ and its test fixtures live in their own repository.
 
 家族各仓（角色 · 技术栈 · 状态）见本文开头的 **「KeelBase 家族」** 段。关系是**平行**的：协议在本仓；
 各实现与各自的测试夹具在各自仓。
+
+## Consumers / 消费方
+
+The vectors, the schemas and the registry are taken **at a version**, never from `main`: a consumer that
+tracks `main` is not pinned to anything, and a compatibility claim is a version rather than a moving
+target. Two consumers today, and they consume differently:
+
+- **KeelBase** (the main repository) takes this repository as a **submodule**, pinned to a released
+  commit. That is the whole mechanism — CI refuses edits to that path outright, because a protocol
+  change made in the consumer is a second contract.
+- **KeelBase4J** does not use a submodule. It **vendors** the protocol half of this repository into
+  `conformance/vectors/`, and that copy is what its conformance corpus replays against.
+
+**What a vendored copy owes.** It must match the version the consumer *answers for*. A copy states a
+version, so it can always be checked against the one it claims; what cannot be checked is a copy that
+was taken once and then left behind while the pin moved — that is the drift this section exists to name.
+Raising the pin and re-vendoring therefore belong in the **same** change.
+
+**Who checks it.** KeelBase4J's `vector-drift` job checks its snapshot against its own pin and against
+the main repository's scenario packs (those live there, not here). KeelBase's `java-vector-drift` job
+checks KeelBase4J out and compares its vendored vectors against what this repository's pin gives the
+main repository. The second exists because neither of the first two can see the other move: a pin can be
+left behind in silence, and the only thing that notices is a comparison **between the two consumers**.
+
+`G0` is KeelBase4J's own name for its conformance run over that snapshot. It is not a version of this
+contract and not a file here.
+
+---
+
+向量、schema 与 registry 一律**按版本取**，从不取 `main`：跟 `main` 的消费方等于没有钉版本，而兼容性
+承诺是一个**版本**，不是一个会动的目标。今天有两个消费方，取法还不一样：
+
+- **KeelBase**（主仓）以 **submodule** 取本仓，钉在一个已发布的提交上。机制就这一条 —— CI 直接拒绝
+  改动那条路径，因为「在消费方里改协议」等于造出第二份契约。
+- **KeelBase4J** 不用 submodule。它把本仓的协议那一半 **vendored** 进 `conformance/vectors/`，它的
+  conformance 语料重放的就是那份副本。
+
+**一份 vendored 副本欠什么。** 它必须与消费方**所应答的那个版本**一致。副本自己写着版本，所以永远能
+对着它自称的那版去核；核不了的是「取了一次、此后 pin 前进了副本没跟」—— 那正是本节的立意所在。因此
+**抬 pin 与重新 vendor 属于同一处改动**。
+
+**谁在核。** KeelBase4J 的 `vector-drift` job 拿它自己的 pin（以及主仓的场景包 —— 那些住在主仓、不在
+本仓）去核它的快照。KeelBase 的 `java-vector-drift` job 把 KeelBase4J 检出到 runner 上，拿本仓的 pin
+交给主仓的那批向量，去核它的 vendored 向量。**后一条之所以存在**：前两条谁也看不见对方动了 —— pin 可以
+被无声地落下，而唯一会看见的，是**两个消费方之间**的那次比对。
+
+`G0` 是 KeelBase4J 对自己那次 conformance 跑的称呼，不是本契约的某个版本，也不是本仓里的某个文件。
