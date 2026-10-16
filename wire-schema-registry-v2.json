@@ -108,11 +108,12 @@
     },
     {
       "id": "evidence-package",
-      "version": "v3",
+      "version": "v6",
       "schema": "evidence-package.schema.json",
-      "title": "审计证据包 keelbase-audit-evidence/1|2|3（v3：signature 段扩为 oneOf[null, 字符串 HMAC, {hmac, sm2?}]，SM2 国密非对称验签）",
-      "source": "src/ai/audit/audit.service.ts:123-180; scripts/verify-evidence.mjs",
+      "title": "审计证据包 keelbase-audit-evidence/1|2|3|4（v6：新增 /4 —— 形状与 /3 逐字相同，另加一个必填 coverage 段「覆盖声明」；v3：signature 段扩为 oneOf[null, 字符串 HMAC, {hmac, sm2?}]，SM2 国密非对称验签）",
+      "source": "src/ai/audit/audit.service.ts:123-180; src/ai/audit/coverage.service.ts; scripts/verify-evidence.mjs",
       "samples": [
+        "schemas/v6/samples/evidence-package.json",
         "schemas/v3/samples/evidence-package.json",
         "schemas/v3/samples/evidence-package-legacy-signature.json"
       ]

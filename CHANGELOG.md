@@ -5,6 +5,66 @@
 
 ---
 
+## v1.10.0 — 2026-10-16
+
+**MINOR — the evidence package gains a fourth format, and the one thing it was never able to say.**
+
+**What changed**
+
+`evidence-package` moves to **v6**, adding `format` **`keelbase-audit-evidence/4`**. The `/4` branch is
+the `/3` branch **verbatim** apart from two deltas, and the generator that produced it asserts exactly
+that: `format.const` changes, and `coverage` joins `required`. A new `definitions.coverage` carries it.
+
+`coverage` says what the package was read from and what reading it cannot show: `registryRevision`
+(which revision of the gap registry judged it), `scope` (the period), `sources` (only the sources that
+were actually read, with row counts), `verdict` (`complete` / `partial` / `unknown`) and `gaps` (each
+with a stable `id`, a `severity`, whether it `affects` this package or the whole deployment, and an
+English `statement`).
+
+Untouched: every `/1`..`/3` branch, the signature section, and the folded shapes. The v3 schemas and
+samples stay in `schemas/v3/` as frozen history.
+
+**Why**
+
+The governance chain's second breakpoint says it plainly — the claim that the recorded rows are a
+faithful and complete projection of the business actions is an **assumption**. A package silent about
+its own coverage lets a reader take that silence for completeness, which is the one thing an audit
+record must never invite.
+
+**Why a new format rather than an optional field on `/3`.** The whole value of the section is that a
+package *cannot* omit it. An optional field is one a producer may skip, which is precisely the failure
+mode this exists to remove; and adding `coverage` to `/3`'s `required` would make every already
+published `/3` package invalid. So `/4` is "the format that has to state its coverage", and `/1`..`/3`
+stay valid as history. Note what a `/4` package can still say: `verdict` may well be `unknown` — no
+external anchor is obtainable today — and that is the honest answer, not a defect.
+
+**MINOR —— 证据包多出第四档格式，以及它一直说不出那句话的能力。**
+
+**改了什么**
+
+`evidence-package` 升到 **v6**，新增 `format` **`keelbase-audit-evidence/4`**。`/4` 分支是 `/3` 分支的
+**逐字副本**，只有两处增量 —— 而生成它的那段脚本**正是这么自证的**：`format.const` 变，`coverage` 进
+`required`。承载它的是一个新增的 `definitions.coverage`。
+
+`coverage` 说的是这份包**从什么读来**、以及**这么读看不了什么**：`registryRevision`（由哪一版缺口登记表
+判的）、`scope`（期间）、`sources`（**只列真的读过的**源与行数）、`verdict`（`complete` / `partial` /
+`unknown`）、`gaps`（每条带稳定 `id`、`severity`、影响的是**这份包**还是**整个部署**，以及一句英文
+`statement`）。
+
+未动：`/1`..`/3` 的每一个分支、签名段、以及各折叠形状。v3 的 schema 与样例留在 `schemas/v3/` 作为冻结
+历史。
+
+**为什么**
+
+治理链的**断点二**把话说得很白 —— 「账上的行集合是业务动作成员的忠实且完整投影」**只是一个假设**。
+一份对自己的覆盖面保持沉默的包，会让读者把那句沉默读成「完整」，而那是审计记录**最不该招来**的读法。
+
+**为什么是新档而不是给 `/3` 加个可选字段。** 这一段的全部价值在于**一份包不可能省略它**。可选字段就是
+生产者**可以跳过**的字段，而那恰恰是它要消除的失效模式；而把 `coverage` 加进 `/3` 的 `required` 会让
+**每一份已发布的 `/3` 包变成非法**。故 `/4` = 「**必须交代覆盖**的那一档格式」，`/1`..`/3` 作为历史仍然
+合法。注意一份 `/4` 包**仍然可能**说 `verdict: unknown` —— 今天拿不到外部锚 —— 那是**诚实的答案，不是
+缺陷**。
+
 ## v1.9.0 — 2026-10-13
 
 **MINOR — the conversation views learn a name and a count, and both are optional.**
