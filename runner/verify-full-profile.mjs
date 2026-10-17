@@ -136,13 +136,21 @@ let negativeMissing = 0;
 let negativeBad = 0;
 for (const obj of objects) {
   for (const entry of obj.negativeSamples ?? []) {
-    // Entries may be a bare path, or {path, validUnder}. `validUnder` makes the pass self-proving:
-    // the sample must be valid under the shape it was taken from, so a rejection under the current
-    // schema cannot be caused by an unrelated violation that drifted into the fixture.
-    const rel = typeof entry === 'string' ? entry : entry.path;
-    const validUnder = typeof entry === 'string' ? null : entry.validUnder;
-    const P = join(SPECS_DIR, rel);
+    // `{path, validUnder}` is required, not optional: `validUnder` makes the pass self-proving by
+    // asserting the sample is valid under the shape it was taken from. A bare path would let a
+    // drifted fixture count as a rejection again, so it is refused rather than accepted.
+    //
+    // 必须写成 `{path, validUnder}`，不再接受裸路径：`validUnder` 断言样例在它取自的那份 schema 下
+    // 合法，从而让这一遍自证。裸路径会让漂移的样例重新被算作一次拒绝，故直接拒绝该形状。
     negativeAttempted++;
+    if (typeof entry === 'string' || !entry || !entry.path || !entry.validUnder) {
+      record('F4', `负样例 ${obj.id}`, false, `负样例条目须为 {path, validUnder}：${JSON.stringify(entry)}`);
+      negativeBad++;
+      continue;
+    }
+    const rel = entry.path;
+    const validUnder = entry.validUnder;
+    const P = join(SPECS_DIR, rel);
     if (!existsSync(P)) {
       record('F4', `负样例 ${obj.id}`, false, `负样例文件不存在：${rel}`);
       negativeMissing++;
@@ -150,14 +158,12 @@ for (const obj of objects) {
       continue;
     }
     const data = JSON.parse(readFileSync(P, 'utf8'));
-    if (validUnder) {
-      const baseline = validate(validUnder, data);
-      if (!baseline.ok) {
-        record('F4', `负样例 ${obj.id}`, false,
-          `负样例本身在 ${validUnder} 下不合法（拒绝会因无关原因）：${rel}${baseline.resolved ? ` — ${baseline.errors.join(' ｜ ')}` : ''}`);
-        negativeBad++;
-        continue;
-      }
+    const baseline = validate(validUnder, data);
+    if (!baseline.ok) {
+      record('F4', `负样例 ${obj.id}`, false,
+        `负样例本身在 ${validUnder} 下不合法（拒绝会因无关原因）：${rel}${baseline.resolved ? ` — ${baseline.errors.join(' ｜ ')}` : ''}`);
+      negativeBad++;
+      continue;
     }
     const { ok, resolved } = validate(obj.schema, data);
     // An unresolved schema makes every negative sample "fail" for the wrong reason: nothing was
@@ -170,12 +176,12 @@ for (const obj of objects) {
     }
   }
 }
-// Always emit the line: a registry that silently lost `negativeSamples` must still show that the
-// reverse pass ran and found nothing to check, rather than leaving the report with no trace of it.
+// The reverse half must never disappear silently: a registry that lost every `negativeSamples` entry
+// fails rather than reporting a vacuous pass.
+record('F4', 'registry 至少登记了一份负样例', negativeAttempted > 0,
+  negativeAttempted === 0 ? '未登记 negativeSamples' : `${negativeAttempted} 份`);
 record('F4', 'registry 负样例被 schema 拒绝', negativeBad === 0,
-  negativeAttempted === 0
-    ? '0 份负样例（registry 未登记 negativeSamples）'
-    : `${negativeAttempted} 份负样例，${negativeBad} 处未通过${negativeMissing > 0 ? `（其中 ${negativeMissing} 份缺失）` : ''}`);
+  `${negativeAttempted} 份负样例，${negativeBad} 处未通过${negativeMissing > 0 ? `（其中 ${negativeMissing} 份缺失）` : ''}`);
 if (loadFailures.length) record('F4', 'schema 全部注册成功', false, loadFailures.join(' | '));
 
 /* ═══════════ F4 / F5 在线探针 ═══════════ */

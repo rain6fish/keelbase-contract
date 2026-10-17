@@ -42,7 +42,7 @@ this release and the nine places that read the index resolve by path. **The stri
    only the pickup leaves the extra file never reported as extra.
 4. **⚠ If you key by `$id`, read it out of the file.** In v1 this field held the schema's own `$id`, and
    an `$id` is not always the file name here — `sse-event.schema.json` carries
-   `sse-event-v2.schema.json`, and `side-effect-revoke` carries `v2/…`. For a consumer that used the
+   `sse-event-v3.schema.json`, and `side-effect-revoke` carries `v5/…`. For a consumer that used the
    field as an `$id`, v2 is therefore **not the same index**: it will land on another version's file
    without saying so. Resolve the path from `version` + `schema`, then read `$id` from the file.
 5. `runner/check-registry-paths.mjs --strict` is the gate to switch on **after** the consumers have
