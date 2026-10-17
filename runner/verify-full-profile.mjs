@@ -131,26 +131,34 @@ record('F4', 'registry 全部对象样本过其 schema', sampleBad === 0, `${sam
 // 负样例承载形状变更的**另一半**：旧形态必须**被拒**。正样例只能证明新形态被接受；没有这一遍，
 // 一个松到新旧都收的 schema 照样会显示绿灯。故 `negativeSamples` 里的每一条都必须校验失败 ——
 // **被接受**才是失败。
+let negativeAttempted = 0;
 let negativeChecked = 0;
 let negativeBad = 0;
 for (const obj of objects) {
   for (const rel of obj.negativeSamples ?? []) {
     const P = join(SPECS_DIR, rel);
+    negativeAttempted++;
     if (!existsSync(P)) {
       record('F4', `负样例 ${obj.id}`, false, `负样例文件不存在：${rel}`);
       negativeBad++;
       continue;
     }
-    const { ok } = validate(obj.schema, JSON.parse(readFileSync(P, 'utf8')));
+    const { ok, errors } = validate(obj.schema, JSON.parse(readFileSync(P, 'utf8')));
+    // An unresolved schema makes every negative sample "fail" for the wrong reason: nothing was
+    // compared, so the pass proves nothing. Count that as a failure, not as a rejection.
+    const unresolved = errors.some((e) => e.includes('schema 未注册'));
     negativeChecked++;
-    if (ok) {
-      record('F4', `负样例 ${obj.id}`, false, `负样例被接受（应被拒）：${rel}`);
+    if (ok || unresolved) {
+      record('F4', `负样例 ${obj.id}`, false, unresolved
+        ? `负样例无法判定（schema 未注册）：${rel}`
+        : `负样例被接受（应被拒）：${rel}`);
       negativeBad++;
     }
   }
 }
-if (negativeChecked > 0) {
-  record('F4', 'registry 负样例被 schema 拒绝', negativeBad === 0, `${negativeChecked} 份负样例，${negativeBad} 处被接受`);
+if (negativeAttempted > 0) {
+  record('F4', 'registry 负样例被 schema 拒绝', negativeBad === 0,
+    `${negativeAttempted} 份负样例，${negativeBad} 处未通过${negativeAttempted > negativeChecked ? `（其中 ${negativeAttempted - negativeChecked} 份缺失）` : ''}`);
 }
 if (loadFailures.length) record('F4', 'schema 全部注册成功', false, loadFailures.join(' | '));
 
