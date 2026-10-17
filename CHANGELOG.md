@@ -5,6 +5,52 @@
 
 ---
 
+## v1.11.0 — 2026-10-17
+
+**MINOR — a side-effect row can finally say who caused it.**
+
+**What changed**
+
+`side-effect-revoke` moves to **v5**, adding an optional `userId` to **both** `item` and `traceItem` —
+the caller whose call produced the write. `required` is unchanged and both objects keep
+`additionalProperties:false`, so a v4-shaped payload still validates and a frozen v4 sample still reads
+under the v5 schema. The v4 schema and samples stay in `schemas/v4/` untouched; the new samples live in
+`schemas/v5/samples/`, including one without `userId` that holds the additive claim to the check.
+
+Both branches, not only `item`: the Java runtime answers the console's list with the `traceItem` shape
+(its rows carry `argsHash` and the two snapshots), and a branch that declares nothing new would reject
+the field it is now sent. The reference runtime's console list uses `item`; one field name serves both
+readers because it is the same fact, and a version that declared it in one place only would force the
+two consumers apart for no gain.
+
+**Why**
+
+`JV-65`: the entity and the `side_effects.user_id` column have existed since 2026-09-29, and the wire
+never carried the value — so a console could show what the AI wrote and when, but not **who** it wrote
+for. The field was already stored; this is the declaration that lets a reader see it. Optional rather
+than required, because v4's payloads are real and must keep validating: additive means alongside, and
+the no-user-id sample is the assertion of that.
+
+**MINOR —— 副作用行终于说得出「是谁引起的」。**
+
+**改了什么**
+
+`side-effect-revoke` 升到 **v5**，给 **`item` 与 `traceItem` 两处**各加一个可选 `userId` —— 发起那次写的
+调用方。`required` 不变、两个对象仍是 `additionalProperties:false`，故 v4 形态的载荷照样合法、冻结的 v4
+样例也照样能按 v5 schema 读。v4 的 schema 与样例在 `schemas/v4/` 里一字不动；新样例住在
+`schemas/v5/samples/`，其中一条**不带** `userId`，把「加性」这句话交给检查去证。
+
+两处都加，不只是 `item`：Java 运行时答控制台那张列表用的是 `traceItem` 形状（它的行带 `argsHash` 与两个
+快照），一个什么都没新声明的分支会**拒掉**现在发给它的这个字段。参照实现的控制台列表走 `item`；一个字段名
+同时服务两个读者，因为它说的是**同一件事**，而只在一处声明的版本会平白把两个消费方推开。
+
+**为什么**
+
+`JV-65`：实体与 `side_effects.user_id` 列自 2026-09-29 就在，而 wire 从没带过这个值 —— 于是控制台能显示
+AI 写了什么、什么时候写的，却说不出**为谁**写的。值本来就在存，这次补的是**让读者看得见它的声明**。做成
+可选而非必需，因为 v4 的载荷是真实存在的、必须继续合法：加性就是「并在旁边」，而那条不带 `userId` 的
+样例正是这句话的断言。
+
 ## v1.10.0 — 2026-10-16
 
 **MINOR — the evidence package gains a fourth format, and the one thing it was never able to say.**
