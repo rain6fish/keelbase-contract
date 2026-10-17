@@ -104,7 +104,7 @@ Docker）· 想让存量 Java 系统具备 AI 能力：
 ├── failure-semantics-v2-vector.json  # 失败语义 v2（当前）
 ├── confirmation-lifecycle-v1-vector.json   # 确认生命周期 v1（冻结留档）
 ├── confirmation-lifecycle-v2-vector.json   # 确认生命周期 v2（当前）
-├── wire-schema-registry.json         # wire 对象冻结清单（对象 → schema → 样例 / 负样例）+ schemasDir
+├── wire-schema-registry.json         # wire 对象冻结清单（对象 → schema → 样例 / 负样例{path,validUnder}）+ schemasDir
 ├── schemas/
 │   ├── v1/ … vN/                     # 按版本分层的 wire 形状（draft-07，$id 互引用）
 │   └── …/samples/*.json              # 每对象代表样例

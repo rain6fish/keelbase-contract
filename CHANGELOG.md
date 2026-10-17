@@ -22,12 +22,23 @@ the v3 samples still validate under the v3 schema.
 `sse-event` moves to **v3** for one reason: its `confirmation_request` branch must reference the
 current payload version. An envelope that pins v3 would keep declaring the string shape after the
 payload moved on — the same envelope-versus-payload drift v2 repaired in September. The event-name
-enum, the decision reference and the `tool_start` / `tool_end` branches are unchanged.
+enum and the decision reference are unchanged. The `tool_start` / `tool_end` branches carried the
+same string-versus-object drift: both declared `summary` as a string while the runtime has always
+sent the presentation-text object, and `tool_start` may send `null` for a read tool with no label.
+v3 declares the object at both — nullable on `tool_start` — and adds a sample for each branch.
+Leaving them as they were would have published a version that rejects the payload it was written
+for.
 
 The registry gains `negativeSamples`, and the offline half of the runner now requires each listed
-sample to be **rejected**. The two negative samples are the v3-shaped payloads (one single, one run):
-under v4 they fail with `summary must be object`. Without this pass a schema that grew permissive
-enough to accept both shapes would still show green.
+sample to be **rejected**. The two negative samples are the frozen v3 samples themselves — the exact
+payload shape this version retires — so the rejection is asserted against the real old form rather
+than a hand-kept copy; under v4 they fail with `summary must be object`. Each entry also names the
+schema it must be valid under (`validUnder`), and the runner checks that first: a fixture that drifts
+into an unrelated violation is reported as an invalid sample, not counted as a rejection. An
+unresolved schema counts as a failure rather than an unverified "rejection", and the summary line is
+always emitted, so a registry that lost its negative samples cannot leave the report green with no
+trace. Without this pass a schema that grew permissive enough to accept both shapes would still show
+green.
 
 **Why**
 
@@ -50,12 +61,17 @@ declaration plus the missing half of the gate.
 v1/v2/v3 的 schema 与样例一字不动、仍在原处；v3 的样例仍按 v3 schema 校验。
 
 `sse-event` 升到 **v3**，只为一个理由：它的 `confirmation_request` 分支必须引用**当前**载荷版本。信封若钉住
-v3，就会在载荷已经前进之后继续声明字符串形状 —— 这正是九月 v2 修过的「信封与内层载荷版本脱节」。事件名枚举、
-决策引用与 `tool_start` / `tool_end` 分支均未动。
+v3，就会在载荷已经前进之后继续声明字符串形状 —— 这正是九月 v2 修过的「信封与内层载荷版本脱节」。事件名枚举
+与决策引用均未动。`tool_start` / `tool_end` 两处带着**同一类**字符串对对象的漂移：它们都把 `summary` 声明为
+字符串，而运行时一直发的是呈现文案对象，且 `tool_start` 在只读工具没有标签时可能发 `null`。v3 把两处都改为
+该对象（`tool_start` 可为 null），并各补一份样例。留着不改，等于发布一版**会拒掉它本来要承载的载荷**的契约。
 
-registry 新增 `negativeSamples`，runner 的离线半现在要求其中每一条**被拒**。两条负样例就是 v3 形态的载荷
-（一条单条、一条 run）：在 v4 下它们以 `summary must be object` 失败。没有这一遍，一个松到新旧形状都收的
-schema 照样会显示绿灯。
+registry 新增 `negativeSamples`，runner 的离线半现在要求其中每一条**被拒**。两条负样例就是**冻结的 v3
+样例本身** —— 正是本版要退掉的那种载荷形状 —— 故拒绝是拿**真实的旧形态**去证的，而不是一份手工维护的副本；
+在 v4 下它们以 `summary must be object` 失败。每条还注明它必须在哪份 schema 下合法（`validUnder`），runner
+**先核这一条**：一份漂移出无关违规的样例会被报成「样例本身不合法」，而不是被算作一次拒绝。schema 未解析现在
+判为**失败**、而不是一次未经比较的「被拒」，且汇总行**总是**输出，故一个丢了负样例的 registry 不可能在报告上
+不留痕迹地变绿。没有这一遍，一个松到新旧形状都收的 schema 照样会显示绿灯。
 
 **为什么**
 
@@ -85,9 +101,9 @@ two consumers apart for no gain.
 
 **Why**
 
-`JV-65`: the entity and the `side_effects.user_id` column have existed since 2026-09-29, and the wire
-never carried the value — so a console could show what the AI wrote and when, but not **who** it wrote
-for. The field was already stored; this is the declaration that lets a reader see it. Optional rather
+`JV-65`: the entity and the `side_effects.user_id` column have existed since 2026-09-29, and the frozen
+side-effect object never carried the value — so a console reading that object could show what the AI
+wrote and when, but not **who** it wrote for. The field was already stored; this is the declaration that lets a reader see it. Optional rather
 than required, because v4's payloads are real and must keep validating: additive means alongside, and
 the no-user-id sample is the assertion of that.
 
@@ -106,8 +122,8 @@ the no-user-id sample is the assertion of that.
 
 **为什么**
 
-`JV-65`：实体与 `side_effects.user_id` 列自 2026-09-29 就在，而 wire 从没带过这个值 —— 于是控制台能显示
-AI 写了什么、什么时候写的，却说不出**为谁**写的。值本来就在存，这次补的是**让读者看得见它的声明**。做成
+`JV-65`：实体与 `side_effects.user_id` 列自 2026-09-29 就在，而**冻结的副作用对象**从没带过这个值 —— 于是
+按那个对象读的控制台能显示 AI 写了什么、什么时候写的，却说不出**为谁**写的。值本来就在存，这次补的是**让读者看得见它的声明**。做成
 可选而非必需，因为 v4 的载荷是真实存在的、必须继续合法：加性就是「并在旁边」，而那条不带 `userId` 的
 样例正是这句话的断言。
 

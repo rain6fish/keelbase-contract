@@ -132,21 +132,36 @@ record('F4', 'registry 全部对象样本过其 schema', sampleBad === 0, `${sam
 // 一个松到新旧都收的 schema 照样会显示绿灯。故 `negativeSamples` 里的每一条都必须校验失败 ——
 // **被接受**才是失败。
 let negativeAttempted = 0;
-let negativeChecked = 0;
+let negativeMissing = 0;
 let negativeBad = 0;
 for (const obj of objects) {
-  for (const rel of obj.negativeSamples ?? []) {
+  for (const entry of obj.negativeSamples ?? []) {
+    // Entries may be a bare path, or {path, validUnder}. `validUnder` makes the pass self-proving:
+    // the sample must be valid under the shape it was taken from, so a rejection under the current
+    // schema cannot be caused by an unrelated violation that drifted into the fixture.
+    const rel = typeof entry === 'string' ? entry : entry.path;
+    const validUnder = typeof entry === 'string' ? null : entry.validUnder;
     const P = join(SPECS_DIR, rel);
     negativeAttempted++;
     if (!existsSync(P)) {
       record('F4', `负样例 ${obj.id}`, false, `负样例文件不存在：${rel}`);
+      negativeMissing++;
       negativeBad++;
       continue;
     }
-    const { ok, resolved } = validate(obj.schema, JSON.parse(readFileSync(P, 'utf8')));
+    const data = JSON.parse(readFileSync(P, 'utf8'));
+    if (validUnder) {
+      const baseline = validate(validUnder, data);
+      if (!baseline.ok) {
+        record('F4', `负样例 ${obj.id}`, false,
+          `负样例本身在 ${validUnder} 下不合法（拒绝会因无关原因）：${rel}${baseline.resolved ? ` — ${baseline.errors.join(' ｜ ')}` : ''}`);
+        negativeBad++;
+        continue;
+      }
+    }
+    const { ok, resolved } = validate(obj.schema, data);
     // An unresolved schema makes every negative sample "fail" for the wrong reason: nothing was
     // compared, so the pass proves nothing. Count that as a failure, not as a rejection.
-    negativeChecked++;
     if (ok || !resolved) {
       record('F4', `负样例 ${obj.id}`, false, !resolved
         ? `负样例无法判定（schema 未注册）：${rel}`
@@ -155,10 +170,12 @@ for (const obj of objects) {
     }
   }
 }
-if (negativeAttempted > 0) {
-  record('F4', 'registry 负样例被 schema 拒绝', negativeBad === 0,
-    `${negativeAttempted} 份负样例，${negativeBad} 处未通过${negativeAttempted > negativeChecked ? `（其中 ${negativeAttempted - negativeChecked} 份缺失）` : ''}`);
-}
+// Always emit the line: a registry that silently lost `negativeSamples` must still show that the
+// reverse pass ran and found nothing to check, rather than leaving the report with no trace of it.
+record('F4', 'registry 负样例被 schema 拒绝', negativeBad === 0,
+  negativeAttempted === 0
+    ? '0 份负样例（registry 未登记 negativeSamples）'
+    : `${negativeAttempted} 份负样例，${negativeBad} 处未通过${negativeMissing > 0 ? `（其中 ${negativeMissing} 份缺失）` : ''}`);
 if (loadFailures.length) record('F4', 'schema 全部注册成功', false, loadFailures.join(' | '));
 
 /* ═══════════ F4 / F5 在线探针 ═══════════ */
