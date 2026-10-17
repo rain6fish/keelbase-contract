@@ -160,8 +160,10 @@ for (const obj of objects) {
     const data = JSON.parse(readFileSync(P, 'utf8'));
     const baseline = validate(validUnder, data);
     if (!baseline.ok) {
-      record('F4', `负样例 ${obj.id}`, false,
-        `负样例本身在 ${validUnder} 下不合法（拒绝会因无关原因）：${rel}${baseline.resolved ? ` — ${baseline.errors.join(' ｜ ')}` : ''}`);
+      const why = baseline.resolved
+        ? `负样例本身在 ${validUnder} 下不合法（拒绝会因无关原因）：${rel} — ${baseline.errors.join(' ｜ ')}`
+        : `负样例的基准 schema 未注册：${validUnder}（无法证明它属于旧形态）：${rel}`;
+      record('F4', `负样例 ${obj.id}`, false, why);
       negativeBad++;
       continue;
     }

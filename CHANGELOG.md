@@ -19,7 +19,7 @@ and the object is `additionalProperties:false`. Nothing else in the payload chan
 v3's `revokeClass` are carried forward. Schemas and samples for v1/v2/v3 stay exactly where they are;
 the v3 samples still validate under the v3 schema.
 
-`sse-event` moves to **v3** for one reason: its `confirmation_request` branch must reference the
+`sse-event` moves to **v3** for two reasons. Its `confirmation_request` branch must reference the
 current payload version. An envelope that pins v3 would keep declaring the string shape after the
 payload moved on — the same envelope-versus-payload drift v2 repaired in September. The event-name
 enum and the decision reference are unchanged. The `tool_start` / `tool_end` branches carried the
@@ -60,7 +60,7 @@ declaration plus the missing half of the gate.
 对象本身 `additionalProperties:false`。载荷其余部分不变：v2 的 `impact` 与 v3 的 `revokeClass` 原样保留。
 v1/v2/v3 的 schema 与样例一字不动、仍在原处；v3 的样例仍按 v3 schema 校验。
 
-`sse-event` 升到 **v3**，只为一个理由：它的 `confirmation_request` 分支必须引用**当前**载荷版本。信封若钉住
+`sse-event` 升到 **v3**，有两个理由。它的 `confirmation_request` 分支必须引用**当前**载荷版本。信封若钉住
 v3，就会在载荷已经前进之后继续声明字符串形状 —— 这正是九月 v2 修过的「信封与内层载荷版本脱节」。事件名枚举
 与决策引用均未动。`tool_start` / `tool_end` 两处带着**同一类**字符串对对象的漂移：它们都把 `summary` 声明为
 字符串，而运行时一直发的是呈现文案对象，且 `tool_start` 在只读工具没有标签时可能发 `null`。v3 把两处都改为

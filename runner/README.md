@@ -9,7 +9,7 @@ not a figure of speech.
 
 | Runner | What it checks |
 |---|---|
-| [`verify-full-profile.mjs`](verify-full-profile.mjs) | The Full profile's **offline half**: every registry sample validated against the schema its entry names, and every `negativeSamples` entry **rejected**. An entry is a path or `{path, validUnder}`; `validUnder` is checked first, so a fixture that drifted into an unrelated violation is reported rather than counted as a rejection. An unresolved schema counts as a failure, not a rejection |
+| [`verify-full-profile.mjs`](verify-full-profile.mjs) | The Full profile's **offline half**: every registry sample validated against the schema its entry names, and every `negativeSamples` entry **rejected**. An entry **must** be `{path, validUnder}` (a bare path is refused); `validUnder` is checked first, so a fixture that drifted into an unrelated violation is reported rather than counted as a rejection. An unresolved schema counts as a failure, not a rejection |
 | [`verify-protocol-conformance.mjs`](verify-protocol-conformance.mjs) | Protocol conformance: canonical JSON, the audit hash chain, the delegation token, risk derivation, governance binding |
 | [`check-registry-paths.mjs`](check-registry-paths.mjs) | Registry path resolution, **report-only**: every `objects[].schema` must resolve to a file on disk (the two frozen-debt entries are allowlisted — ADR-0007 §3 Q10) |
 | [`lib/protocol-algorithms.mjs`](lib/protocol-algorithms.mjs) | The deterministic single source `verify-protocol-conformance.mjs` checks against (Node's `crypto` only) |
@@ -75,7 +75,7 @@ is the thing this repository exists to prevent.
 
 | runner | 查什么 |
 |---|---|
-| [`verify-full-profile.mjs`](verify-full-profile.mjs) | Full 剖面的**离线半**：registry 每个对象的样本过它条目所指的 schema，且每条 `negativeSamples` **被拒**。条目可以是路径或 `{path, validUnder}`；`validUnder` 先核，故漂移出无关违规的样例会被报出来、而不是算作一次拒绝。schema 未解析判为失败，不算「被拒」 |
+| [`verify-full-profile.mjs`](verify-full-profile.mjs) | Full 剖面的**离线半**：registry 每个对象的样本过它条目所指的 schema，且每条 `negativeSamples` **被拒**。条目**必须**是 `{path, validUnder}`（裸路径直接拒绝）；`validUnder` 先核，故漂移出无关违规的样例会被报出来、而不是算作一次拒绝。schema 未解析判为失败，不算「被拒」 |
 | [`verify-protocol-conformance.mjs`](verify-protocol-conformance.mjs) | 协议合规：canonical JSON · 审计哈希链 · 委托 token · 风险派生 · 治理绑定 |
 | [`check-registry-paths.mjs`](check-registry-paths.mjs) | registry 路径解析，**只报告**：每条 `objects[].schema` 须能解析到实盘文件（两条冻结的债已 allowlist —— ADR-0007 §3 Q10） |
 | [`lib/protocol-algorithms.mjs`](lib/protocol-algorithms.mjs) | `verify-protocol-conformance.mjs` 据以断言的确定性单源（只依赖 Node `crypto`） |

@@ -86,4 +86,6 @@ for what belongs there and what has not arrived yet.
   of the contract**; it does not get renamed.
 - A schema with a cross-file relative `$ref` must use a bare `$id`. A `v<N>/` prefix sends the
   relative resolution into a directory that does not exist — this has already happened once.
-- Samples are illustrations, not assertions. They must still validate against their schema.
+- Samples are illustrations, not assertions — they must still validate against their schema. The
+  exception is an entry listed in `negativeSamples`, whose **rejection** is asserted: it must be valid
+  under the schema named by its `validUnder` and rejected by the current one.
