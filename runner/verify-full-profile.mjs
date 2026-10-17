@@ -74,13 +74,13 @@ for (const [id, schema] of schemasById) {
   try { ajv.addSchema(schema, id); } catch (e) { loadFailures.push(`schema 非法: ${id} — ${String(e).split('\n')[0]}`); }
 }
 
-/** 以 $id 校验一份数据。返回 {ok, errors} */
+/** 以 $id 校验一份数据。返回 {ok, resolved, errors}；resolved=false 表示 schema 没解析到，校验根本没发生 */
 function validate(schemaId, data) {
   const v = (() => { try { return ajv.getSchema(schemaId); } catch { return undefined; } })();
-  if (!v) return { ok: false, errors: [`schema 未注册：${schemaId}`] };
+  if (!v) return { ok: false, resolved: false, errors: [`schema 未注册：${schemaId}`] };
   const ok = v(data);
   const errors = ok ? [] : (v.errors ?? []).slice(0, 6).map((e) => `${e.instancePath || '/'} ${e.message}`);
-  return { ok, errors };
+  return { ok, resolved: true, errors };
 }
 
 /* ─────────── 结果收集 ─────────── */
@@ -143,13 +143,12 @@ for (const obj of objects) {
       negativeBad++;
       continue;
     }
-    const { ok, errors } = validate(obj.schema, JSON.parse(readFileSync(P, 'utf8')));
+    const { ok, resolved } = validate(obj.schema, JSON.parse(readFileSync(P, 'utf8')));
     // An unresolved schema makes every negative sample "fail" for the wrong reason: nothing was
     // compared, so the pass proves nothing. Count that as a failure, not as a rejection.
-    const unresolved = errors.some((e) => e.includes('schema 未注册'));
     negativeChecked++;
-    if (ok || unresolved) {
-      record('F4', `负样例 ${obj.id}`, false, unresolved
+    if (ok || !resolved) {
+      record('F4', `负样例 ${obj.id}`, false, !resolved
         ? `负样例无法判定（schema 未注册）：${rel}`
         : `负样例被接受（应被拒）：${rel}`);
       negativeBad++;
