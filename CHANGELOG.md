@@ -5,6 +5,66 @@
 
 ---
 
+## v1.12.0 — 2026-10-17
+
+**MINOR — the confirmation summary is declared as the object that was always being sent.**
+
+**What changed**
+
+`confirmation-request` moves to **v4**. Both `summary` declarations — the top-level one and
+`run.items[].summary`, the per-action one in a batch — change from `string` to the
+**`{ key, fallback, params? }`** object the server has emitted since the presentation text moved
+server-side. `key` and `fallback` are required, `params` is an optional map of names to string values,
+and the object is `additionalProperties:false`. Nothing else in the payload changes: v2's `impact` and
+v3's `revokeClass` are carried forward. Schemas and samples for v1/v2/v3 stay exactly where they are;
+the v3 samples still validate under the v3 schema.
+
+`sse-event` moves to **v3** for one reason: its `confirmation_request` branch must reference the
+current payload version. An envelope that pins v3 would keep declaring the string shape after the
+payload moved on — the same envelope-versus-payload drift v2 repaired in September. The event-name
+enum, the decision reference and the `tool_start` / `tool_end` branches are unchanged.
+
+The registry gains `negativeSamples`, and the offline half of the runner now requires each listed
+sample to be **rejected**. The two negative samples are the v3-shaped payloads (one single, one run):
+under v4 they fail with `summary must be object`. Without this pass a schema that grew permissive
+enough to accept both shapes would still show green.
+
+**Why**
+
+`CONF-4`: the server has always sent `{key, fallback, params?}` — the summary is a deterministic
+function of tool name and arguments, written by `ToolPresentationService.writeSummary` — while every
+confirmation-request schema from v1 through v3 declared `string`. No gate caught it because the
+runtime's binding test only compared **key sets** with the schema, and the contract's offline check
+only fed it **positive** samples: a string-declaring schema accepts no object sample, but the
+reverse — an object-declaring schema that still accepts a string — was never asked. The fix is the
+declaration plus the missing half of the gate.
+
+**MINOR —— 确认摘要按其一直实际下发的对象来声明。**
+
+**改了什么**
+
+`confirmation-request` 升到 **v4**。**两处** `summary` —— 顶层的，以及批量 run 里逐条的
+`run.items[].summary` —— 由 `string` 改为服务端自呈现文案迁到服务端以来**一直实际下发**的
+**`{ key, fallback, params? }`** 对象。`key` 与 `fallback` 必填，`params` 是可选的「名字到字符串值」映射，
+对象本身 `additionalProperties:false`。载荷其余部分不变：v2 的 `impact` 与 v3 的 `revokeClass` 原样保留。
+v1/v2/v3 的 schema 与样例一字不动、仍在原处；v3 的样例仍按 v3 schema 校验。
+
+`sse-event` 升到 **v3**，只为一个理由：它的 `confirmation_request` 分支必须引用**当前**载荷版本。信封若钉住
+v3，就会在载荷已经前进之后继续声明字符串形状 —— 这正是九月 v2 修过的「信封与内层载荷版本脱节」。事件名枚举、
+决策引用与 `tool_start` / `tool_end` 分支均未动。
+
+registry 新增 `negativeSamples`，runner 的离线半现在要求其中每一条**被拒**。两条负样例就是 v3 形态的载荷
+（一条单条、一条 run）：在 v4 下它们以 `summary must be object` 失败。没有这一遍，一个松到新旧形状都收的
+schema 照样会显示绿灯。
+
+**为什么**
+
+`CONF-4`：服务端一直发 `{key, fallback, params?}` —— 摘要是（工具名，参数）的确定性函数，由
+`ToolPresentationService.writeSummary` 写出 —— 而 v1 到 v3 的每一份 confirmation-request schema 都声明
+`string`。没有闸门拦住它，因为运行时的绑定测试只与 schema 比对**键集**，而契约的离线检查只喂**正**样例：
+声明字符串的 schema 不接受对象样例，但反过来 —— 声明对象的 schema 是否仍然接受字符串 —— 从没有人问过。
+修的就是这处声明，加上闸门缺掉的那一半。
+
 ## v1.11.0 — 2026-10-17
 
 **MINOR — a side-effect row can finally say who caused it.**
