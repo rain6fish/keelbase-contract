@@ -88,12 +88,13 @@
     },
     {
       "id": "trace-step",
-      "version": "v2",
+      "version": "v3",
       "schema": "trace-step.schema.json",
-      "title": "Conversation Trace Step（GET /ai/conversations/:id/trace data.steps[]，v2：`outcome` 加 `pending_approval`；v1 为 approve/decline/timeout）",
+      "title": "Conversation Trace Step（GET /ai/conversations/:id/trace data.steps[]，v3：`traceEffect` 声明 `status`——归一生命周期 executed/revoked/revoking_external/revoke_failed，轨迹一直下发、schema 此前未命名；v2 加 `outcome=pending_approval`；v1 为 approve/decline/timeout）",
       "source": "src/ai/trace/decision-trace.service.ts",
       "samples": [
-        "schemas/v2/samples/trace-step.json"
+        "schemas/v2/samples/trace-step.json",
+        "schemas/v3/samples/trace-step-effect.json"
       ]
     },
     {

@@ -5,6 +5,50 @@
 
 ---
 
+## v1.13.0 — 2026-10-20
+
+**MINOR — the trace's effect now declares the lifecycle status it always carried.**
+
+**What changed**
+
+`trace-step` moves to **v3**. The `traceEffect` definition gains a required `status`, a frozen enum of
+`executed` / `revoked` / `revoking_external` / `revoke_failed` — the same four values `side-effect-revoke`
+already declares. Nothing else moves: `effectId`, `resultType`, `resultId`, `targetTitle`, `revocable`,
+`before` and `after` keep their v2 shapes and semantics, the `type` and `outcome` enums are untouched,
+and the existing v2 sample still validates under v3. A new sample,
+`schemas/v3/samples/trace-step-effect.json`, exercises an `effect` step so the new field is covered by
+the offline check rather than only described. `schemas/v1/` and `schemas/v2/` stay exactly where they
+are.
+
+**Why**
+
+The trace endpoint has emitted `status` since the effect projection was normalized: `normalizeStatus`
+produces the reading once, `decision-trace.service.ts` passes it through untouched, and the relation is
+documented in both places. The schema never named it, and `additionalProperties: true` made that
+invisible — every sample and every runtime payload validated whether or not the declaration was
+correct. That silence is the problem: a consumer reading the schema would not know the field exists,
+and a future rename would break nobody's check. Declaring it costs one additive version and makes the
+contract match what the trace actually sends.
+
+**MINOR —— 轨迹里的副作用补上它一直携带的生命周期状态。**
+
+**改了什么**
+
+`trace-step` 升到 **v3**。`traceEffect` 定义新增必填 `status`，取值为冻结枚举
+`executed` / `revoked` / `revoking_external` / `revoke_failed` —— 与 `side-effect-revoke` 早已声明的
+**同样是这四个值**。其余一字未动：`effectId`、`resultType`、`resultId`、`targetTitle`、`revocable`、
+`before`、`after` 保持 v2 的形状与语义，`type` 与 `outcome` 两个枚举不动，既有的 v2 样例在 v3 下
+**仍然通过**。新增样例 `schemas/v3/samples/trace-step-effect.json` 覆盖一个 `effect` 步，使新字段被离线
+检查真正执行到，而不只是被描述一句。`schemas/v1/` 与 `schemas/v2/` 仍在原处、一字不改。
+
+**为什么**
+
+自副作用投影归一以来，轨迹端点就一直在下发 `status`：`normalizeStatus` 只产生一次读数，
+`decision-trace.service.ts` 原样透传，两处都有文档说明。schema 却从未命名它，而
+`additionalProperties: true` 让这件事**不可见** —— 无论声明对不对，每份样例、每份运行时载荷都照样通过。
+这种沉默才是问题：读 schema 的消费方无从知道该字段存在，将来改名也不会有任何检查失败。补声明只花一个
+加性版本，换来契约与轨迹实际下发的形状一致。
+
 ## v1.12.0 — 2026-10-17
 
 **MINOR — the confirmation summary is declared as the object that was always being sent.**
