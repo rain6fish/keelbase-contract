@@ -5,6 +5,75 @@
 
 ---
 
+## v1.14.0 — 2026-10-20
+
+**MINOR — the execution id both audit and effect rows already carry is now declared.**
+
+**What changed**
+
+`ai-audit-log-row` and `side-effect-revoke` each move to **v6**, side by side with their frozen
+predecessors. Both gain an optional `executionId` on the row that belongs to one governed execution:
+the audit row itself, and the `item` / `traceItem` definitions of the side-effect object. The two
+objects remain `additionalProperties:false`, so the field is declared exactly where it is emitted and
+nowhere else; `revokeResult` and `revokeBatch` are untouched. The field is **not** in `required` in
+either object — a v5-shaped payload without it stays valid, which the new no-`executionId` samples
+assert on every check. `schemas/v1/` through `schemas/v5/` and everything `v1.13.0` published stay
+exactly where they are.
+
+The registry entries for both objects move to v6, name the new schemas, and list samples that cover
+the field in both objects, including a shared UUID (`6f3c2a9e-…`) that pairs one audit row with one
+effect item and its trace item. A bilingual v6 note records the change in the registry's own note.
+
+**Why**
+
+The Java runtime mints one UUID per governed execution (`GovernedExecutionEngine.run`: `executionId =
+UUID.randomUUID().toString()`) and writes that same value into both the audit row (`AuditLog.executionId`)
+and the side-effect row (`SideEffect.executionId`); both tables are queried by it
+(`findByExecutionIdOrderByIdAsc`). Neither frozen wire declared it. The consequence was concrete: an
+effect and its audit row could only be paired by tool + user + time, which is a guess, not a join —
+two attempts of the same call in the same minute are indistinguishable.
+
+The field is optional because the concept is not universal: the TypeScript reference implementation
+has no execution id at all (no `executionId` / `actionId` anywhere under `Server-NestJS/src`), so a
+runtime without it sends `null` or omits the key. It is a chain-external column: it never enters the
+hash payload, exactly like `ip`, `guestId`, `deviceId`, `outcome` and `tool`.
+
+**Consumer impact.** Old payloads remain valid under v6, so a consumer that does not read the field
+needs no change. A consumer that wants to join effects to audit rows must raise its pin to v6; one
+still validating against v5 will reject a v6 payload that carries `executionId`, because both objects
+are `additionalProperties:false`.
+
+**MINOR —— 审计行与副作用行早已同值的执行 id，现在写进契约。**
+
+**改了什么**
+
+`ai-audit-log-row` 与 `side-effect-revoke` 各升到 **v6**，与各自冻结的前一版并列。两者都加上**可选**
+`executionId`，落在属于同一次受治理执行的那一行上：审计行本身，以及副作用对象的 `item` / `traceItem`
+两个定义。两个对象仍是 `additionalProperties:false`，故字段只声明在实际下发的位置；`revokeResult` 与
+`revokeBatch` 一字未动。该字段**不进**任一对象的 `required` —— 不带它的 v5 形态载荷仍然合法，新增的
+「不带 `executionId`」样例每次检查都会断言这一点。`schemas/v1/` 到 `schemas/v5/`、以及 `v1.13.0`
+发布的一切，仍在原处、一字不改。
+
+registry 里两个条目随升 v6，指向新 schema，并登记覆盖该字段的样例（两个对象都有），其中三条共用同一个
+UUID（`6f3c2a9e-…`），把一条审计行与一个副作用 item、以及它的 trace item 配在一起。registry 自己的
+`note` 追加了一条中英双语的 v6 说明。
+
+**为什么**
+
+Java 运行时为每一次受治理执行生成一个 UUID（`GovernedExecutionEngine.run`：`executionId =
+UUID.randomUUID().toString()`），并把**同一个值**写进审计行（`AuditLog.executionId`）与副作用行
+（`SideEffect.executionId`）；两张表都按它查询（`findByExecutionIdOrderByIdAsc`）。两份冻结 wire 却都
+没有声明它。后果是具体的：一条副作用与它的审计行此前只能靠 tool + user + 时间配对 —— 那是猜测、不是
+连接；同一分钟内同一调用的两次尝试根本无法区分。
+
+字段做成可选，是因为这个概念并不普适：TypeScript 参照实现整体没有 execution id（`Server-NestJS/src`
+下没有任何 `executionId` / `actionId`），故没有该概念的运行时发 `null` 或省略该键。它是链外列：永不进入
+hash payload，与 `ip`、`guestId`、`deviceId`、`outcome`、`tool` 同一性质。
+
+**对消费方的影响。** 旧载荷在 v6 下仍然合法，故不读该字段的消费方无需改动。想用这个键把副作用与审计行
+连起来的消费方，须把 pin 升到 v6；仍按 v5 校验的一方会拒掉带 `executionId` 的 v6 载荷，因为两个对象都是
+`additionalProperties:false`。
+
 ## v1.13.0 — 2026-10-20
 
 **MINOR — the trace's effect now declares the lifecycle status it always carried.**
