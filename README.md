@@ -1,7 +1,9 @@
 # KeelBase Contract / KeelBase 契约
 
-> 本仓是 KeelBase「AI 治理协议」的**机器可校验契约**：wire 对象 Schema、语言无关一致性向量，以及两者共用的一条版本线。
 > Hosts the KeelBase AI-governance protocol as a machine-checkable contract: the wire-object schemas, the language-neutral conformance vectors, and the single version line they share.
+> 本仓是 KeelBase「AI 治理协议」的**机器可校验契约**：wire 对象 Schema、语言无关一致性向量，以及两者共用的一条版本线。
+
+**This repository belongs to no implementation.** The TypeScript and Java runtimes consume it **in parallel** — both are consumers, and **no implementation has the right to change it unilaterally**. The protocol's semantics originate here; implementations follow the contract, not the other way round.
 
 **本仓不隶属于任何实现。** TS runtime 与 Java runtime 各自**平行**消费它——两者都只是消费者，**没有任何一个实现有权单方面改动它**。协议语义的源在本仓；实现跟随契约，而不是契约跟随某一个实现。
 
