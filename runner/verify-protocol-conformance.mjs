@@ -212,12 +212,33 @@ const bindingVectors = SPECS('governance-binding-v1-vector.json');
     : bad('授权拒绝依据词表唯一且非空', JSON.stringify(denies));
 }
 
-/* ═══════════ 审计行的结果码词表（ai-audit-log-row v5，C-3） ═══════════ */
+/* ═══════════ 审计行的结果码词表（ai-audit-log-row，C-3） ═══════════ */
 
-console.log('\n─ 审计行结果码词表（ai-audit-log-row v5）─');
+console.log('\n─ 审计行结果码词表（ai-audit-log-row，C-3）─');
 
-const outcomeVectors = SPECS('ai-audit-log-outcome-v1-vector.json');
-{
+/**
+ * Every outcome vector the contract has published, oldest first.
+ *
+ * A vector is a **published file**, and the additive rule forbids rewriting one — so a vocabulary
+ * change ships as a new file beside the old, and every published vector is checked here rather than
+ * only the newest. v1 pins the v5 shape; v2 pins the same vocabulary plus `not_executed` (a
+ * `tool_call` whose confirmation window closed with no decision — nothing ran, which `failed` never
+ * said).
+ *
+ * 契约发布过的每一份结果码向量，从旧到新。
+ *
+ * 向量是**已发布文件**，加性规则不许重写它 —— 故词表变更以新文件并列发布；这里检的是**每一份**
+ * 已发布向量，而不只是最新的那份。v1 钉 v5 形态；v2 在同一份词表上加 `not_executed`（确认窗口到期、
+ * 无人裁决的 `tool_call` —— 一次都没跑，而 `failed` 从来不是这个意思）。
+ */
+const OUTCOME_VECTOR_FILES = [
+  'ai-audit-log-outcome-v1-vector.json',
+  'ai-audit-log-outcome-v2-vector.json',
+];
+
+for (const outcomeVectorFile of OUTCOME_VECTOR_FILES) {
+  const outcomeVectors = SPECS(outcomeVectorFile);
+  const tag = `[${outcomeVectors.vectorVersion}] `;
   const declared = Object.keys(outcomeVectors.outcomes).sort();
   const grouped = [...new Set(
     Object.entries(outcomeVectors.legalByAction)
@@ -225,15 +246,15 @@ const outcomeVectors = SPECS('ai-audit-log-outcome-v1-vector.json');
       .flatMap(([, values]) => values),
   )].sort();
   JSON.stringify(grouped) === JSON.stringify(declared)
-    ? ok('legalByAction 恰好覆盖 outcomes 的每一个值（且不多不少）', `${declared.length} 值`)
-    : bad('legalByAction 恰好覆盖 outcomes 的每一个值', `outcomes=${declared} · grouped=${grouped}`);
+    ? ok(`${tag}legalByAction 恰好覆盖 outcomes 的每一个值（且不多不少）`, `${declared.length} 值`)
+    : bad(`${tag}legalByAction 恰好覆盖 outcomes 的每一个值`, `outcomes=${declared} · grouped=${grouped}`);
 
   const nullOnlyOutside = Object.entries(outcomeVectors.legalByAction)
     .filter(([, values]) => values.includes(null))
     .map(([action]) => action);
   JSON.stringify(nullOnlyOutside) === JSON.stringify(['any-other-action'])
-    ? ok('null 只对「非工具行」合法', 'any-other-action')
-    : bad('null 只对「非工具行」合法', JSON.stringify(nullOnlyOutside));
+    ? ok(`${tag}null 只对「非工具行」合法`, 'any-other-action')
+    : bad(`${tag}null 只对「非工具行」合法`, JSON.stringify(nullOnlyOutside));
 
   let casesOk = true;
   for (const c of outcomeVectors.cases) {
@@ -242,11 +263,14 @@ const outcomeVectors = SPECS('ai-audit-log-outcome-v1-vector.json');
     const legal = 'outcome' in c.in ? group.includes(c.in.outcome) : c.in.tool !== undefined && isToolAction;
     if (legal !== c.expect.legal) {
       casesOk = false;
-      bad(c.name, `语料自称 ${c.expect.legal}，按 legalByAction 判为 ${legal}`);
+      bad(`${tag}${c.name}`, `语料自称 ${c.expect.legal}，按 legalByAction 判为 ${legal}`);
     }
   }
-  casesOk && ok('每一条 case 与 legalByAction 自洽（合法的被接受、不合法的被拒）', `${outcomeVectors.cases.length} 条`);
+  casesOk && ok(`${tag}每一条 case 与 legalByAction 自洽（合法的被接受、不合法的被拒）`, `${outcomeVectors.cases.length} 条`);
 }
+
+/** The newest published vocabulary — what a fresh consumer should read. */
+const outcomeVectors = SPECS(OUTCOME_VECTOR_FILES[OUTCOME_VECTOR_FILES.length - 1]);
 
 /* ═══════════ 报告 ═══════════ */
 

@@ -5,6 +5,57 @@
 
 ---
 
+## v1.15.0 — 2026-10-28
+
+**MINOR — the outcome vocabulary learns "nothing ran".**
+
+**What changed**
+
+`ai-audit-log-row` moves to **v7**, side by side with its frozen predecessors. Its `outcome` enum gains
+one value, `not_executed`, for a `tool_call` whose confirmation window closed with no decision: the call
+never ran, and `failed` — "it was tried and it broke" — was the only word the vocabulary offered it.
+`schemas/v1/` through `schemas/v6/`, and everything `v1.14.0` published, stay exactly where they are.
+
+A new vector, `ai-audit-log-outcome-v2-vector.json`, pins the extended vocabulary: `not_executed` joins
+`legalByAction.tool_call`, with its own definition and a conformance case. **`…outcome-v1-vector.json` is
+untouched** — a published vector is not rewritten, so the two live side by side and `runner/` now checks
+both. The registry entry for `ai-audit-log-row` moves to v7 and lists a v7 sample of that shape.
+
+**Why**
+
+A row that ends without running is not a row that ran and failed, and the TypeScript reference runtime
+had to write `failed` for it. The P0-19 ② readings measured the cost: that row answers "what came of
+this" with a word that says an attempt happened, and a reader of the row alone cannot tell the two
+apart. `pending` cannot carry it either — the window is over — and `timeout` is legal only on
+`tool_confirmation`, where the fact recorded is the decision's endpoint, not the call's.
+
+**Impact on consumers.** Rows stay valid under v6 apart from the one new value, so a consumer that
+never meets a timed-out call needs no change; one that wants to tell "never ran" from "ran and failed"
+pins v7 and accepts `not_executed`.
+
+**MINOR —— 结局词表学会了「一次都没跑」。**
+
+**改了什么**
+
+`ai-audit-log-row` 升到 **v7**，与冻结的前几版并列。`outcome` 的 enum 加一个值 `not_executed`，用于
+确认窗口到期、无人裁决的 `tool_call`：那次调用一次都没跑，而 `failed`（「试过、坏了」）是词表此前唯一
+能给它用的词。`schemas/v1/` 到 `schemas/v6/`、以及 `v1.14.0` 发布的一切，仍在原处、一字不改。
+
+新增向量 `ai-audit-log-outcome-v2-vector.json` 钉住扩展后的词表：`not_executed` 进入
+`legalByAction.tool_call`，带自己的定义与一条 conformance case。**`…outcome-v1-vector.json` 逐字未动**
+—— 已发布的向量不重写，故两份并列、`runner/` 现在两份都检。registry 里 `ai-audit-log-row` 的条目随升
+v7，并登记一份该形态的 v7 样例。
+
+**为什么**
+
+一次以「没有执行」收场的记录，不是一次跑过又失败的记录，而 TypeScript 参照实现此前只能给它写
+`failed`。P0-19 ② 的读数把代价量了出来：那一格「这次怎么了」用一个「试过」的词作答，只读这一行的
+读者分辨不出两者。`pending` 也接不住它 —— 窗口已经过去；`timeout` 只对 `tool_confirmation` 合法，
+而那一行记的是**裁决**的终点，不是调用的。
+
+**对消费方的影响。** 除这一个新值外，行在 v6 下仍合法，故从不会遇到超时调用的消费方无需改动；想区分
+「没发生」与「跑过并失败」的一方须把 pin 升到 v7 并接受 `not_executed`。
+
 ## v1.14.0 — 2026-10-20
 
 **MINOR — the execution id both audit and effect rows already carry is now declared.**

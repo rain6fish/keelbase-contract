@@ -99,6 +99,7 @@ Docker）· 想让存量 Java 系统具备 AI 能力：
 ├── canonical-json-v1-vector.json     # §2.3 canonicalJSON 金样本（flat/nested/array/null/number/unicode 边界）
 ├── audit-hash-v1-vector.json         # §2 hash / legacy 派生 / 链校验 / 篡改反例
 ├── ai-audit-log-outcome-v1-vector.json # AI 审计行 outcome 词表（结构化结果码）
+├── ai-audit-log-outcome-v2-vector.json # 同上 + `not_executed`（没发生：确认窗口到期、无人裁决），当前
 ├── delegation-token-v1-vector.json   # §3 委托 token（相对时间构造 → 确定性、无时间戳）
 ├── risk-level-v1-vector.json         # §4 风险分级派生 + RISK_STRATEGY 表
 ├── governance-binding-v1-vector.json # §4.3/§4.4 策略→放行决策绑定 + deny 依据词表
