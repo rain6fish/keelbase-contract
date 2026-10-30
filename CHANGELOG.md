@@ -5,6 +5,53 @@
 
 ---
 
+## v1.16.0 — 2026-10-30
+
+**MINOR — the action report names the gate that refused, and chain verification brings its denominator.**
+
+**What changed**
+
+`audit-action-report`, `audit-chain-verification` and `audit-usage-stats` move to **v2**, each side by
+side with its frozen v1 predecessor. The action report gains `refused` in `summary` and in every `byDay`
+bucket, and `byDay` now classifies a row by the `outcome` column `summary` reads rather than a regex over
+`errorMessage`. Usage stats gains the same `refused` in each `byDay` bucket, so its daily segments still
+add up to the categories the report counts. Chain verification gains `tableRows` beside `checked`.
+`schemas/v1/` and everything `v1.15.0` published stay exactly where they are; the three v1 samples become
+negative samples that must be rejected.
+
+**Why**
+
+`blocked` and `refused` are two gates, not one: the risk policy never reaches a decision, while the
+governance / authorization gate refuses after one. v1 counted only the first, so a refused call fell into
+`errors` next to genuine execution failures — and because `byDay` classified by `errorMessage` while
+`summary` read `outcome`, the two halves of one response disagreed about the same row. A rate computed
+over `checked` alone has a second problem: a row without a `hash` is never verified, so the denominator a
+reader cannot see makes the rate look better or worse than it is.
+
+**Impact on consumers.** A consumer that never meets a refused call and never quotes a verification rate
+needs no change; one that reports either pins v2. The objects remain `additionalProperties:false`, so a
+v1 consumer rejects a v2 payload — the version has to be followed, not guessed.
+
+**MINOR —— 报表点名拒绝它的那道闸，链校验带上分母。**
+
+**改了什么**
+
+`audit-action-report`、`audit-chain-verification` 与 `audit-usage-stats` 升到 **v2**，各自与冻结的 v1 前代并列。
+Action Report 的 `summary` 与每个 `byDay` 桶新增 `refused`，且 `byDay` 改为按 `summary` 读的那一列 `outcome`
+分类，不再用 `errorMessage` 正则。用量统计在每个 `byDay` 桶加同一个 `refused`，按日分段才仍加得回报表数的那些
+类别。链校验在 `checked` 旁新增 `tableRows`。`schemas/v1/` 与 `v1.15.0` 发布的一切仍在原处、一字不改；三份
+v1 样例转为必须被拒的负样例。
+
+**为什么**
+
+`blocked` 与 `refused` 是两道闸，不是一道：风险策略压根没到过裁决，而治理 / 授权闸是在裁决之后拒绝。v1 只数
+前者，于是被拒的调用落进 `errors`，与真正的执行失败混在一起；又因为 `byDay` 按 `errorMessage` 分行、而
+`summary` 读 `outcome`，同一份响应的两半对同一行给出不同答案。只看 `checked` 的验证率还有第二个问题：`hash`
+为空的行从不参与校验，读者看不见的那个分母会让这个比率显得比实际更好或更差。
+
+**对消费方的影响。** 从不会遇到被拒调用、也不引用验证率的消费方无需改动；要报这两样的一方钉 v2。对象仍是
+`additionalProperties:false`，故按 v1 校验的消费者会拒掉 v2 载荷 —— 版本要跟，不能猜。
+
 ## v1.15.0 — 2026-10-28
 
 **MINOR — the outcome vocabulary learns "nothing ran".**
