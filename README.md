@@ -7,6 +7,10 @@
 
 **本仓不隶属于任何实现。** TS runtime 与 Java runtime 各自**平行**消费它——两者都只是消费者，**没有任何一个实现有权单方面改动它**。协议语义的源在本仓；实现跟随契约，而不是契约跟随某一个实现。
 
+**Articles** — the long-form essays on AI execution governance and AI audit evidence: [keelbase.hashnode.dev](https://keelbase.hashnode.dev/).
+
+**系列长文** —— AI 执行治理与 AI 审计证据两条线的长文：[OSChina 文集](https://my.oschina.net/u/4166179/blog)。
+
 <!-- BEGIN keelbase-family:en sha256:92e82fd34f0a15d22b119841121b79f97caa1bfb8f5d77dcdcf73002c9257be0 -->
 ## 🧬 The KeelBase family
 
