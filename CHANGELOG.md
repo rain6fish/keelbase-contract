@@ -5,6 +5,57 @@
 
 ---
 
+## v1.17.0 — 2026-11-01
+
+**MINOR — an effect's result id may be text, because not every business object is numbered.**
+
+**What changed**
+
+`side-effect-revoke` moves to **v7** and `trace-step` moves to **v4**, each beside its frozen
+predecessor. In both, `resultId` — `item` / `traceItem` in the first, `traceEffect` in the second —
+now accepts a string as well as a number. No field is added, removed or renamed, and nothing moves out
+of `required`. Three samples carrying a Flowable instance id are added: one per `side-effect-revoke`
+shape and one `trace-step`. `schemas/v6/` and `schemas/v3/` are unchanged.
+
+**Why**
+
+The effect ledger names the row a write produced. A consumer that records it honestly hit a business
+object whose key is a UUID — a Flowable process instance — and the frozen schemas typed that field as
+a number, so the only payloads that could conform were the ones that could not name the row. The
+other objects in the family already had this right: `audit-action-report`, `evidence-package`,
+`confirmation-decision` and `external-effects-*` have accepted `["number", "string"]` for some time.
+This closes the gap on the two that carry the effect list and the trace.
+
+This version is cut from the `v1.16.0` tag, not from `main`'s tip: the membership change that follows
+it (`7a250e5`) is unreleased and is not part of it.
+
+**Impact on consumers.** Every payload accepted by v6 / v3 is still accepted, unchanged: a numeric id
+is valid, and both objects remain `additionalProperties:false`, so a v6 consumer rejects only a
+payload that actually carries a text id. A consumer that never records a UUID-keyed object needs no
+change; one that does pins v7 / v4.
+
+**MINOR —— 副作用的结果 id 可以是文本，因为不是每个业务对象都有编号。**
+
+**改了什么**
+
+`side-effect-revoke` 升到 **v7**、`trace-step` 升到 **v4**，各自与冻结的前代并列。两者里 `resultId` ——
+前者是 `item` / `traceItem`、后者是 `traceEffect` —— 现在在数字之外接受字符串。没有字段被新增、删除或
+改名，也没有任何字段移出 `required`。新增三份带 Flowable 实例 id 的样例：`side-effect-revoke` 的两个形状
+各一份，`trace-step` 一份。`schemas/v6/` 与 `schemas/v3/` 一字未动。
+
+**为什么**
+
+副作用账本要点出一次写**产出了哪一行**。一个诚实记账的消费方碰上了键为 UUID 的业务对象（Flowable 流程
+实例），而冻结 schema 把这个字段定成数字，于是能合规的载荷只剩**说不出那一行**的那些。同一族里其它对象早已
+是对的：`audit-action-report`、`evidence-package`、`confirmation-decision` 与 `external-effects-*` 接受
+`["number", "string"]` 已有一段时间。本次补上的是承载副作用清单与轨迹的那两个。
+
+本版从 `v1.16.0` tag 切出、不是从 `main` 的末端：它之后的成员性改动（`7a250e5`）尚未发布，不属于本版。
+
+**对消费方的影响。** v6 / v3 接受的每一份载荷现在仍被接受、形状不变：数字 id 合法，且两个对象仍是
+`additionalProperties:false`，故 v6 消费者只在载荷**真的携带**文本 id 时才拒它。从不记录 UUID 型对象的
+消费方无需改动；记录的那一种钉 v7 / v4。
+
 ## v1.15.0 — 2026-10-28
 
 **MINOR — the outcome vocabulary learns "nothing ran".**
