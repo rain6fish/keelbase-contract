@@ -5,6 +5,61 @@
 
 ---
 
+## v1.18.0 — 2026-11-04
+
+**MINOR — a chain verification and an action report publish their membership, and a response says which order it applied.**
+
+**What changed**
+
+Six files are new and no published file is rewritten. `audit-chain-verification` moves to **v3**: it
+publishes the populations instead of only the counts — `tableIds` / `verifiedIds` are sha256
+fingerprints (first 16 hex, ids sorted ascending, comma-joined) that a reader can recompute from its
+own enumeration, and `unverifiedIds` names the difference down to capped row ids. `audit-action-report`
+moves to **v3** and gains `unaccounted`: tool rows that were in scope and landed in no counter at all,
+with the reason. The v2 samples become negative samples that v3 must reject. `api-response` moves to
+**v2**, adding an optional `ordering` block — field, direction, who controls the field, the tie-break
+or `null`, and whether the position is covered by the chain. Both registries move to match;
+`schemas/v1/` and the v2 chain/action-report files stay exactly as published.
+
+**Why**
+
+Two numbers read off one table agree for free: a total and a per-day sum both come from the writer, so
+their equality says nothing about whether a reader can reach every row. Publishing the populations
+makes membership checkable by the reader rather than asserted by the producer — and a row that
+vanishes from every number reads exactly like a row that was never written, which is why the report
+has to name the rows that landed nowhere.
+
+A page tells a reader nothing about the order that produced it: two surfaces of the same system can
+sort by different fields, and a client holding rows cannot tell a timeline from an arbitrary page. The
+declaration belongs on the response that applies it.
+
+**Impact on consumers.** Additive throughout. `ordering` is optional and not in `required`, so a v1
+payload still validates under v2. The two v3 reports require the membership fields, so a consumer of
+those objects pins v2 or moves to v3 — the v2 files remain published and unchanged.
+
+**MINOR —— 链校验与报表公布成员性，响应声明它应用的顺序。**
+
+**改了什么**
+
+六个文件是新增的，没有已发布文件被重写。`audit-chain-verification` 升到 **v3**：公布的是人口，而不只是
+计数 —— `tableIds` / `verifiedIds` 是 sha256 指纹（前 16 位十六进制，id 升序、逗号连接），读者可从自己的
+枚举重算；`unverifiedIds` 把差额点名到 id（封顶）。`audit-action-report` 升到 **v3**，新增
+`unaccounted`：在范围里却一桶不进的工具行，带原因。v2 的样例转为 v3 下必须被拒的负样例。`api-response`
+升到 **v2**，新增可选 `ordering` 块 —— 字段、方向、谁控制该字段、并列次序键或 `null`、以及位置是否被链
+覆盖。两份 registry 随之更新；`schemas/v1/` 与那两份 v2 文件保持发布时的样子，一字未动。
+
+**为什么**
+
+同一张表上读出的两个数是无偿地相等的：总数与按日合计都出自写入方，两者一致对「读者是否够得到每一行」一个
+字也说明不了。公布人口让成员性**可被读者核验**，而不是由产出方断言 —— 而从每个数里消失的行，读起来与从未
+写入的行一模一样，所以报表必须点名那些一桶不进的行走到了哪里。
+
+一页结果不告诉读者它是按什么顺序产生的：同一个系统的两个面可以按不同字段排序，而拿着行的客户端分不出这是
+时间线还是一页任意结果。声明应当挂在**应用了它的那个响应**上。
+
+**对消费方的影响。** 全程加性。`ordering` 是可选的、不进 `required`，故 v1 载荷在 v2 下仍然通过。两份 v3
+报表要求成员性字段，故那两个对象的消费方要么钉 v2、要么升到 v3 —— v2 的文件仍然发布着、一字未改。
+
 ## v1.17.0 — 2026-11-01
 
 **MINOR — an effect's result id may be text, because not every business object is numbered.**
