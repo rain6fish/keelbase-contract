@@ -193,11 +193,12 @@
     },
     {
       "id": "api-response",
-      "version": "v1",
+      "version": "v2",
       "schema": "api-response.schema.json",
-      "title": "统一 REST 成功信封 ApiResponse",
-      "source": "src/common/interfaces/api-response.interface.ts:3-8; src/common/interceptors/response.interceptor.ts:39-45",
+      "title": "统一 REST 成功信封 ApiResponse（v2 加可选 `ordering` 排序声明）",
+      "source": "src/common/interfaces/api-response.interface.ts; src/common/interceptors/response.interceptor.ts; governance-shared/services/ordering.ts",
       "samples": [
+        "schemas/v2/samples/api-response.json",
         "schemas/v1/samples/api-response.json"
       ]
     },
