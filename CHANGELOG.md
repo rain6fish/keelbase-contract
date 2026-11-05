@@ -7,58 +7,53 @@
 
 ## v1.18.0 — 2026-11-04
 
-**MINOR — a chain verification and an action report publish their membership, and a response says which order it applied.**
+**MINOR — a response says which order it applied.**
 
 **What changed**
 
-Six files are new and no published file is rewritten. `audit-chain-verification` moves to **v3**: it
-publishes the populations instead of only the counts — `tableIds` / `verifiedIds` are sha256
-fingerprints (first 16 hex, ids sorted ascending, comma-joined) that a reader can recompute from its
-own enumeration, and `unverifiedIds` names the difference down to capped row ids. `audit-action-report`
-moves to **v3** and gains `unaccounted`: tool rows that were in scope and landed in no counter at all,
-with the reason. The v2 samples become negative samples that v3 must reject. `api-response` moves to
-**v2**, adding an optional `ordering` block — field, direction, who controls the field, the tie-break
-or `null`, and whether the position is covered by the chain. Both registries move to match;
-`schemas/v1/` and the v2 chain/action-report files stay exactly as published.
+Two files are new and no published file is rewritten: `api-response` moves to **v2**, adding an
+optional `ordering` block — the field that decided the order, the direction, who controls that field,
+the tie-break or `null`, and whether the position is covered by the chain. The registry moves to
+match; `schemas/v1/` stays exactly as published, and the v1 sample still validates under v2.
 
 **Why**
 
-Two numbers read off one table agree for free: a total and a per-day sum both come from the writer, so
-their equality says nothing about whether a reader can reach every row. Publishing the populations
-makes membership checkable by the reader rather than asserted by the producer — and a row that
-vanishes from every number reads exactly like a row that was never written, which is why the report
-has to name the rows that landed nowhere.
-
 A page tells a reader nothing about the order that produced it: two surfaces of the same system can
-sort by different fields, and a client holding rows cannot tell a timeline from an arbitrary page. The
-declaration belongs on the response that applies it.
+sort by different fields, and a client holding rows cannot tell a timeline from an arbitrary page.
+Ordering authority belongs to each query, so the declaration travels with the response that applies
+it — one written in a document elsewhere never reaches the reader holding one page.
 
-**Impact on consumers.** Additive throughout. `ordering` is optional and not in `required`, so a v1
-payload still validates under v2. The two v3 reports require the membership fields, so a consumer of
-those objects pins v2 or moves to v3 — the v2 files remain published and unchanged.
+**Impact on consumers.** Additive: `ordering` is optional and not in `required`, so every v1 payload
+remains valid. A consumer that validates against v1 rather than v2 will reject a payload carrying the
+block, which is why the version travels with the data.
 
-**MINOR —— 链校验与报表公布成员性，响应声明它应用的顺序。**
+**What this release deliberately excludes.** The membership change on `main` (`7a250e5`, v3 of
+`audit-chain-verification` and `audit-action-report`) is **not** in this release: Java cannot yet
+answer `tableIds` / `verifiedIds` / `unverifiedIds`, and the 2026-10-31 decision parks it until it
+can. v1.18.0 is cut from the `v1.17.0` tag rather than from `main`'s tip, the same way v1.17.0 was
+cut from v1.16.0.
+
+**MINOR —— 响应说得出来它应用的是哪种顺序。**
 
 **改了什么**
 
-六个文件是新增的，没有已发布文件被重写。`audit-chain-verification` 升到 **v3**：公布的是人口，而不只是
-计数 —— `tableIds` / `verifiedIds` 是 sha256 指纹（前 16 位十六进制，id 升序、逗号连接），读者可从自己的
-枚举重算；`unverifiedIds` 把差额点名到 id（封顶）。`audit-action-report` 升到 **v3**，新增
-`unaccounted`：在范围里却一桶不进的工具行，带原因。v2 的样例转为 v3 下必须被拒的负样例。`api-response`
-升到 **v2**，新增可选 `ordering` 块 —— 字段、方向、谁控制该字段、并列次序键或 `null`、以及位置是否被链
-覆盖。两份 registry 随之更新；`schemas/v1/` 与那两份 v2 文件保持发布时的样子，一字未动。
+两个文件是新增的，没有已发布文件被重写：`api-response` 升到 **v2**，新增可选 `ordering` 块 —— 决定顺序
+的字段、方向、谁控制该字段、并列次序键或 `null`、以及位置是否被链覆盖。registry 随之更新；`schemas/v1/`
+保持发布时的样子，v1 的样例在 v2 下仍然通过。
 
 **为什么**
 
-同一张表上读出的两个数是无偿地相等的：总数与按日合计都出自写入方，两者一致对「读者是否够得到每一行」一个
-字也说明不了。公布人口让成员性**可被读者核验**，而不是由产出方断言 —— 而从每个数里消失的行，读起来与从未
-写入的行一模一样，所以报表必须点名那些一桶不进的行走到了哪里。
-
 一页结果不告诉读者它是按什么顺序产生的：同一个系统的两个面可以按不同字段排序，而拿着行的客户端分不出这是
-时间线还是一页任意结果。声明应当挂在**应用了它的那个响应**上。
+时间线还是一页任意结果。排序权属于每一条查询，故声明随**应用了它的那个响应**一起走 —— 写在别处文档里的
+声明到不了拿着某一页的读者手里。
 
-**对消费方的影响。** 全程加性。`ordering` 是可选的、不进 `required`，故 v1 载荷在 v2 下仍然通过。两份 v3
-报表要求成员性字段，故那两个对象的消费方要么钉 v2、要么升到 v3 —— v2 的文件仍然发布着、一字未改。
+**对消费方的影响。** 加性：`ordering` 是可选的、不进 `required`，故每一份 v1 载荷仍然合法。按 v1 而不是
+v2 校验的消费方会拒掉携带该块的载荷 —— 这正是版本要随数据一起走的原因。
+
+**本版刻意不含的内容。** `main` 上的成员性改动（`7a250e5`，`audit-chain-verification` 与
+`audit-action-report` 的 v3）**不在**本版里：Java 目前还答不出 `tableIds` / `verifiedIds` /
+`unverifiedIds`，2026-10-31 的裁决把它压到 Java 能回答为止。v1.18.0 从 `v1.17.0` tag 切出、不是从
+`main` 的末端，与 v1.17.0 从 v1.16.0 切出的做法相同。
 
 ## v1.17.0 — 2026-11-01
 
@@ -81,8 +76,8 @@ other objects in the family already had this right: `audit-action-report`, `evid
 `confirmation-decision` and `external-effects-*` have accepted `["number", "string"]` for some time.
 This closes the gap on the two that carry the effect list and the trace.
 
-The v1.17.0 artifacts are cut from the `v1.16.0` tag rather than from `main`'s tip: the membership
-change that follows it (`7a250e5`) is unreleased, and the v1.17.0 tag does not contain it.
+This version is cut from the `v1.16.0` tag, not from `main`'s tip: the membership change that follows
+it (`7a250e5`) is unreleased and is not part of it.
 
 **Impact on consumers.** Every payload accepted by v6 / v3 is still accepted, unchanged: a numeric id
 is valid, and both objects remain `additionalProperties:false`, so a v6 consumer rejects only a
@@ -105,57 +100,11 @@ change; one that does pins v7 / v4.
 是对的：`audit-action-report`、`evidence-package`、`confirmation-decision` 与 `external-effects-*` 接受
 `["number", "string"]` 已有一段时间。本次补上的是承载副作用清单与轨迹的那两个。
 
-v1.17.0 的产物从 `v1.16.0` tag 切出、不是从 `main` 的末端：它之后的成员性改动（`7a250e5`）尚未发布，`v1.17.0` tag 不含它。
+本版从 `v1.16.0` tag 切出、不是从 `main` 的末端：它之后的成员性改动（`7a250e5`）尚未发布，不属于本版。
 
 **对消费方的影响。** v6 / v3 接受的每一份载荷现在仍被接受、形状不变：数字 id 合法，且两个对象仍是
 `additionalProperties:false`，故 v6 消费者只在载荷**真的携带**文本 id 时才拒它。从不记录 UUID 型对象的
 消费方无需改动；记录的那一种钉 v7 / v4。
-## v1.16.0 — 2026-10-30
-
-**MINOR — the action report names the gate that refused, and chain verification brings its denominator.**
-
-**What changed**
-
-`audit-action-report`, `audit-chain-verification` and `audit-usage-stats` move to **v2**, each side by
-side with its frozen v1 predecessor. The action report gains `refused` in `summary` and in every `byDay`
-bucket, and `byDay` now classifies a row by the `outcome` column `summary` reads rather than a regex over
-`errorMessage`. Usage stats gains the same `refused` in each `byDay` bucket, so its daily segments still
-add up to the categories the report counts. Chain verification gains `tableRows` beside `checked`.
-`schemas/v1/` and everything `v1.15.0` published stay exactly where they are; the three v1 samples become
-negative samples that must be rejected.
-
-**Why**
-
-`blocked` and `refused` are two gates, not one: the risk policy never reaches a decision, while the
-governance / authorization gate refuses after one. v1 counted only the first, so a refused call fell into
-`errors` next to genuine execution failures — and because `byDay` classified by `errorMessage` while
-`summary` read `outcome`, the two halves of one response disagreed about the same row. A rate computed
-over `checked` alone has a second problem: a row without a `hash` is never verified, so the denominator a
-reader cannot see makes the rate look better or worse than it is.
-
-**Impact on consumers.** A consumer that never meets a refused call and never quotes a verification rate
-needs no change; one that reports either pins v2. The objects remain `additionalProperties:false`, so a
-v1 consumer rejects a v2 payload — the version has to be followed, not guessed.
-
-**MINOR —— 报表点名拒绝它的那道闸，链校验带上分母。**
-
-**改了什么**
-
-`audit-action-report`、`audit-chain-verification` 与 `audit-usage-stats` 升到 **v2**，各自与冻结的 v1 前代并列。
-Action Report 的 `summary` 与每个 `byDay` 桶新增 `refused`，且 `byDay` 改为按 `summary` 读的那一列 `outcome`
-分类，不再用 `errorMessage` 正则。用量统计在每个 `byDay` 桶加同一个 `refused`，按日分段才仍加得回报表数的那些
-类别。链校验在 `checked` 旁新增 `tableRows`。`schemas/v1/` 与 `v1.15.0` 发布的一切仍在原处、一字不改；三份
-v1 样例转为必须被拒的负样例。
-
-**为什么**
-
-`blocked` 与 `refused` 是两道闸，不是一道：风险策略压根没到过裁决，而治理 / 授权闸是在裁决之后拒绝。v1 只数
-前者，于是被拒的调用落进 `errors`，与真正的执行失败混在一起；又因为 `byDay` 按 `errorMessage` 分行、而
-`summary` 读 `outcome`，同一份响应的两半对同一行给出不同答案。只看 `checked` 的验证率还有第二个问题：`hash`
-为空的行从不参与校验，读者看不见的那个分母会让这个比率显得比实际更好或更差。
-
-**对消费方的影响。** 从不会遇到被拒调用、也不引用验证率的消费方无需改动；要报这两样的一方钉 v2。对象仍是
-`additionalProperties:false`，故按 v1 校验的消费者会拒掉 v2 载荷 —— 版本要跟，不能猜。
 
 ## v1.15.0 — 2026-10-28
 
