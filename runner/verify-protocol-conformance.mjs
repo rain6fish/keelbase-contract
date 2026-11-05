@@ -229,11 +229,13 @@ console.log('\n─ 审计行结果码词表（ai-audit-log-row，C-3）─');
  *
  * 向量是**已发布文件**，加性规则不许重写它 —— 故词表变更以新文件并列发布；这里检的是**每一份**
  * 已发布向量，而不只是最新的那份。v1 钉 v5 形态；v2 在同一份词表上加 `not_executed`（确认窗口到期、
- * 无人裁决的 `tool_call` —— 一次都没跑，而 `failed` 从来不是这个意思）。
+ * 无人裁决的 `tool_call` —— 一次都没跑，而 `failed` 从来不是这个意思）。v3 在 `effect_revoke` 上加
+ * `failed` —— 一次撤销**尝试失败**要能在链上点名；`revoked` 仍只表示真的撤销了。
  */
 const OUTCOME_VECTOR_FILES = [
   'ai-audit-log-outcome-v1-vector.json',
   'ai-audit-log-outcome-v2-vector.json',
+  'ai-audit-log-outcome-v3-vector.json',
 ];
 
 for (const outcomeVectorFile of OUTCOME_VECTOR_FILES) {

@@ -5,6 +5,53 @@
 
 ---
 
+## v1.19.0 — 2026-11-05
+
+**MINOR — a failed revocation can name itself on the audit chain.**
+
+**What changed**
+
+One file is new and no published file is rewritten: `ai-audit-log-outcome` moves to **v3**, adding
+`failed` to `legalByAction.effect_revoke`. The action was already the contract's word for a revocation,
+and `revoked` remains the only word for one that landed; `failed` is how an attempt that was made and
+did not land says so. `outcomes.failed` gains the `effect_revoke` reading. The v2 file stays exactly
+as published, and its rows remain legal.
+
+**Why**
+
+The Java runtime recorded a failed local compensation nowhere: the compensation threw, the transaction
+rolled back, and the audit chain gained no row — so "tried to revoke and failed" and "never tried" read
+the same. `revoked` cannot say it without claiming the revoke happened. The vocabulary needs the third
+ending.
+
+**Impact on consumers.** Additive: a consumer validating against v2 still accepts every v2 row; a
+consumer that reads v3 can tell the two endings apart by `outcome` (and `isError`) without parsing
+`detail`. No schema shape changes — `failed` was already in the shared enum.
+
+**Also in this release.** The runner's published-vector list now includes v3. No other vector or
+schema moves.
+
+**MINOR —— 失败的撤销能在审计链上报出自己。**
+
+**改了什么**
+
+新增一份文件，没有已发布文件被重写：`ai-audit-log-outcome` 升到 **v3**，把 `failed` 加进
+`legalByAction.effect_revoke`。`effect_revoke` 早已是契约对「撤销」这个动作的词，`revoked` 仍是「真的撤了」
+的唯一说法；`failed` 说的是「试过、没落地」。`outcomes.failed` 补上 `effect_revoke` 这层读法。v2 逐字保持
+已发布的样子，它的行仍然合法。
+
+**为什么**
+
+Java 运行时过去不记录失败的本地补偿：补偿器抛错、事务回滚、链上不多一行 —— 于是「试过撤销但失败」与
+「从未尝试」读起来一样。`revoked` 说不出这件事，除非声称撤销真的发生了。词表需要第三种结局。
+
+**对消费方的影响。** 加性：按 v2 校验的消费方仍接受每一行 v2；读 v3 的消费方靠 `outcome`（与 `isError`）
+就能分开两种结局，不必解析 `detail`。schema 形状不变 —— `failed` 本来就在共用的枚举里。
+
+**本次发布还包含。** runner 的已发布向量清单加上 v3。其它向量与 schema 未动。
+
+---
+
 ## v1.18.0 — 2026-11-04
 
 **MINOR — a response says which order it applied.**
