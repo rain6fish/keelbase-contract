@@ -5,6 +5,56 @@
 
 ---
 
+## v1.18.0 — 2026-11-04
+
+**MINOR — a response says which order it applied.**
+
+**What changed**
+
+Two files are new and no published file is rewritten: `api-response` moves to **v2**, adding an
+optional `ordering` block — the field that decided the order, the direction, who controls that field,
+the tie-break or `null`, and whether the position is covered by the chain. The registry moves to
+match; `schemas/v1/` stays exactly as published, and the v1 sample still validates under v2.
+
+**Why**
+
+A page tells a reader nothing about the order that produced it: two surfaces of the same system can
+sort by different fields, and a client holding rows cannot tell a timeline from an arbitrary page.
+Ordering authority belongs to each query, so the declaration travels with the response that applies
+it — one written in a document elsewhere never reaches the reader holding one page.
+
+**Impact on consumers.** Additive: `ordering` is optional and not in `required`, so every v1 payload
+remains valid. A consumer that validates against v1 rather than v2 will reject a payload carrying the
+block, which is why the version travels with the data.
+
+**What this release deliberately excludes.** The membership change on `main` (`7a250e5`, v3 of
+`audit-chain-verification` and `audit-action-report`) is **not** in this release: Java cannot yet
+answer `tableIds` / `verifiedIds` / `unverifiedIds`, and the 2026-10-31 decision parks it until it
+can. v1.18.0 is cut from the `v1.17.0` tag rather than from `main`'s tip, the same way v1.17.0 was
+cut from v1.16.0.
+
+**MINOR —— 响应说得出来它应用的是哪种顺序。**
+
+**改了什么**
+
+两个文件是新增的，没有已发布文件被重写：`api-response` 升到 **v2**，新增可选 `ordering` 块 —— 决定顺序
+的字段、方向、谁控制该字段、并列次序键或 `null`、以及位置是否被链覆盖。registry 随之更新；`schemas/v1/`
+保持发布时的样子，v1 的样例在 v2 下仍然通过。
+
+**为什么**
+
+一页结果不告诉读者它是按什么顺序产生的：同一个系统的两个面可以按不同字段排序，而拿着行的客户端分不出这是
+时间线还是一页任意结果。排序权属于每一条查询，故声明随**应用了它的那个响应**一起走 —— 写在别处文档里的
+声明到不了拿着某一页的读者手里。
+
+**对消费方的影响。** 加性：`ordering` 是可选的、不进 `required`，故每一份 v1 载荷仍然合法。按 v1 而不是
+v2 校验的消费方会拒掉携带该块的载荷 —— 这正是版本要随数据一起走的原因。
+
+**本版刻意不含的内容。** `main` 上的成员性改动（`7a250e5`，`audit-chain-verification` 与
+`audit-action-report` 的 v3）**不在**本版里：Java 目前还答不出 `tableIds` / `verifiedIds` /
+`unverifiedIds`，2026-10-31 的裁决把它压到 Java 能回答为止。v1.18.0 从 `v1.17.0` tag 切出、不是从
+`main` 的末端，与 v1.17.0 从 v1.16.0 切出的做法相同。
+
 ## v1.17.0 — 2026-11-01
 
 **MINOR — an effect's result id may be text, because not every business object is numbered.**
