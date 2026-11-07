@@ -5,6 +5,58 @@
 
 ---
 
+## v1.20.0 — 2026-11-06
+
+**MINOR — a human review receipt is a row on the audit chain.**
+
+**What changed**
+
+One schema is new and no published file is rewritten: `audit-payload` moves to **v3**, adding
+`audit_review` to the closed `action` enum. A review receipt is a row of the same chain, and the range it
+covers lives inside the signed `detail`, so «reviewed» cannot be back-filled without breaking a signature.
+Every other field is byte-for-byte v2. `schemas/v2/` stays exactly as published, its rows remain legal,
+and the v2 sample still validates under v3 — the additive proof rides in the registry beside the new
+sample. The registry moves to v3; `wire-schema-registry-v2.json` is regenerated from it.
+
+**Why**
+
+A record can sit in the log for a year before anyone reads it, and nothing in the chain can show that no
+one was assigned to read it or that the reading happened (F-44 / F-47, AW-12). Making the receipt a row of
+the same chain is what makes the claim falsifiable: delete it and the next row's `prevHash` no longer
+resolves; forge one and the row hash fails. A separate table would have let a receipt be appended after
+the fact with no protection.
+
+**Impact on consumers.** Additive: a consumer validating against v2 still accepts every v2 row; a consumer
+that reads v3 accepts the new value. It is not an AI action — `outcome` is always `null`, which the
+outcome vector already covers under `any-other-action`. No other schema moves.
+
+**Also in this release.** The Java runtime vendors this same file pair (KeelBase4J `b0234fe`), and this
+release is cut from the `v1.19.0` tag — no unpublished commit is included.
+
+**MINOR —— 人类复核回执是审计链上的一行。**
+
+**改了什么**
+
+新增一份 schema，没有已发布文件被重写：`audit-payload` 升到 **v3**，在闭合的 `action` 枚举里加
+`audit_review`。复核回执是同一条链上的一行，它覆盖的区间写在被签住的 `detail` 里，于是「已复核」不能被
+事后补写而不破签。其余字段与 v2 逐字相同。`schemas/v2/` 逐字保持已发布的样子，它的行仍然合法，v2 样例
+在 v3 下仍然通过 —— 加性证明与新样例一起挂在 registry 里。registry 升到 v3，`wire-schema-registry-v2.json`
+由它重建。
+
+**为什么**
+
+一条记录可以在日志里躺一年才有人读，而链上没有任何东西能说明「没人被指派去读它」或「这次读发生过」
+（F-44 / F-47，AW-12）。让回执成为同一条链上的一行，这个说法才可证伪：删掉它，下一行的 `prevHash` 就
+指不到；伪造它，行哈希校验不过。旁表里的回执可以事后追加，没有任何保护。
+
+**对消费方的影响。** 加性：按 v2 校验的消费方仍接受每一行 v2；读 v3 的消费方接受新取值。它不是 AI
+动作 —— `outcome` 恒为 `null`，结局向量已用 `any-other-action` 覆盖。其它 schema 未动。
+
+**本次发布还包含。** Java 运行时 vendor 了同一对文件（KeelBase4J `b0234fe`）；本版从 `v1.19.0` 的 tag
+出，不含任何未发布提交。
+
+---
+
 ## v1.19.0 — 2026-11-05
 
 **MINOR — a failed revocation can name itself on the audit chain.**
