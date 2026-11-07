@@ -5,6 +5,68 @@
 
 ---
 
+## v1.21.0 — 2026-11-07
+
+**MINOR — releasing a stuck write hold is a row on the audit chain.**
+
+**What changed**
+
+One schema is new and no published file is rewritten: `audit-payload` moves to **v4**, adding
+`claim_release` to the closed `action` enum. When an operator releases a stale write hold whose
+outcome has stayed unknown past the threshold, the hold's conclusion deliberately stays unknown, and
+the release itself becomes a row of the same chain carrying the note and evidence reference. Every
+other field is byte-for-byte v3. `schemas/v2/` and `schemas/v3/` stay exactly as published, their
+rows remain legal, and both older samples still validate under v4 — the additive proof rides in the
+registry beside the new sample. The registry moves to v4; `wire-schema-registry-v2.json` is
+regenerated from it.
+
+**Why**
+
+A released hold is not a success and not a failure: the write may or may not have reached its target,
+and claiming either would be a guess. What used to happen is that the disposition moved and nothing
+in the chain said so. Making the act a row of the same chain means it can be neither back-filled nor
+silently dropped, and a reader can tell a deliberate release from a hold that was simply abandoned
+(AW-16).
+
+**Impact on consumers.** Additive: a consumer validating against v2 or v3 still accepts every row
+those versions allowed; a consumer that reads v4 accepts the new value. It is not a tool verdict —
+`outcome` is absent, which the outcome vector already covers under `any-other-action`. No other
+schema moves.
+
+**What this release deliberately excludes.** The membership change on `main` (`7a250e5`, v3 of
+`audit-chain-verification` and `audit-action-report`) is **not** in this release: Java cannot yet
+answer `tableIds` / `verifiedIds` / `unverifiedIds`, and the 2026-10-31 decision parks it until it
+can. v1.21.0 is cut from the `v1.20.0` tag rather than from `main`'s tip, the same way v1.20.0 was
+cut from v1.19.0. The Java runtime vendors this same file (KeelBase4J), and its pin moves with this
+release.
+
+**MINOR —— 释放滞留的写占位是审计链上的一行。**
+
+**改了什么**
+
+新增一份 schema，没有已发布文件被重写：`audit-payload` 升到 **v4**，在闭合的 `action` 枚举里加
+`claim_release`。当运维释放一份已越过陈旧阈值、结局始终未知的写占位时，占位的结论**有意保持未知**，而
+释放这个动作本身成为同一条链上的一行，带着说明与证据引用。其余字段与 v3 逐字相同。`schemas/v2/` 与
+`schemas/v3/` 逐字保持已发布的样子，它们的行仍然合法，两份旧样例在 v4 下仍然通过 —— 加性证明与新样例
+一起挂在 registry 里。registry 升到 v4，`wire-schema-registry-v2.json` 由它重建。
+
+**为什么**
+
+被释放的占位既不是成功也不是失败：那次写可能到了目标、也可能没到，断言任何一边都是猜。过去发生的是
+处置被移动了，而链上对此一字未说。让这个动作成为同一条链上的一行，它便既不能被事后补写、也不能被
+悄悄丢弃，读者也能把一次蓄意释放和一份被搁下不管的占位区分开（AW-16）。
+
+**对消费方的影响。** 加性：按 v2 或 v3 校验的消费方仍接受那些版本允许的每一行；读 v4 的消费方接受新
+取值。它不是工具结局 —— `outcome` 不写，结局向量已用 `any-other-action` 覆盖。其它 schema 未动。
+
+**本版刻意不含的内容。** `main` 上的成员性改动（`7a250e5`，`audit-chain-verification` 与
+`audit-action-report` 的 v3）**不在**本版里：Java 目前还答不出 `tableIds` / `verifiedIds` /
+`unverifiedIds`，2026-10-31 的裁决把它压到 Java 能回答为止。v1.21.0 从 `v1.20.0` tag 切出、不是从
+`main` 的末端，与 v1.20.0 从 v1.19.0 切出的做法相同。Java 运行时 vendor 同一份文件（KeelBase4J），其
+pin 随本版前进。
+
+---
+
 ## v1.20.0 — 2026-11-06
 
 **MINOR — a human review receipt is a row on the audit chain.**
