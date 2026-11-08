@@ -15,7 +15,8 @@
     "check:registry-v2": "node runner/build-registry-v2.mjs --check",
     "check:registry-paths": "node runner/check-registry-paths.mjs",
     "check:registry-paths:strict": "node runner/check-registry-paths.mjs --strict",
-    "check:family-block": "node runner/check-family-block.mjs"
+    "check:family-block": "node runner/check-family-block.mjs",
+    "check:tag-lineage": "node scripts/check-tag-lineage.mjs"
   },
   "dependencies": {
     "ajv": "8.18.0",
