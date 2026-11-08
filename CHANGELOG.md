@@ -5,6 +5,28 @@
 
 ---
 
+## Unreleased — 2026-11-08
+
+**Parked — membership v3 leaves the release line.**
+
+**What changed**
+
+`7a250e5` added `schemas/v3/audit-chain-verification` and `schemas/v3/audit-action-report` (membership fingerprints and `unaccounted`). Its files and registry entries are removed from `main`.
+
+**Why**
+
+No tag contains `7a250e5`; neither the TypeScript nor the Java implementation produces the v3 shape, and no conformance vector exercises it. The versioning rule requires a MINOR to land with its implementations in the same batch, so the change is parked rather than released. It remains reachable at `7a250e5` for the day a named consumer and both implementations land together.
+
+**挂起 —— 成员性 v3 退出发布线。**
+
+**改了什么**
+
+`7a250e5` 新增了 `schemas/v3/audit-chain-verification` 与 `schemas/v3/audit-action-report`（成员性指纹与 `unaccounted`）。其文件与 registry 条目已从 `main` 移除。
+
+**为什么**
+
+没有任何 tag 包含 `7a250e5`；TypeScript 与 Java 实现都不产生 v3 形状，也没有一致性向量覆盖它。版本规则要求 MINOR 与实现同批落地，故此改动挂起而非发布。改动仍可在 `7a250e5` 取回，等具名消费方与两个实现同批落地。
+
 ## v1.22.0 — 2026-11-08
 
 **MINOR — the audit chains' tails get an anchor of their own.**
