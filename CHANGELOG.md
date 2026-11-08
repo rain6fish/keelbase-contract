@@ -5,6 +5,67 @@
 
 ---
 
+## v1.22.0 — 2026-11-08
+
+**MINOR — the audit chains' tails get an anchor of their own.**
+
+**What changed**
+
+One wire object is new and no published file is rewritten: `audit-chain-anchor` v1 records, at
+`observedAt`, how many chained rows each of the two audit chains had (`rows`, counted as
+`hash IS NOT NULL`), the id and hash of the last chained row, and a `rootDigest` over
+`{period, date, observedAt, chains}` so a third party can recompute what the SM2 signature covers.
+Both chain keys are required; `null` says "that chain had no chained row at that moment", never
+"unknown". The registry gains the new entry (49 objects) and `wire-schema-registry-v2.json` is
+regenerated from it. No existing schema, sample or vector moves.
+
+**Why**
+
+The package anchor commits to a day's set of evidence-package digests. A chain row that belongs to no
+exported package leaves no digest in that set, so deleting it changes nothing the package anchor can
+see — and a tail deletion is exactly that case. Adding the fields to `evidence-anchor` would rewrite a
+published schema, and an optional field can be omitted by the producer, which is the failure mode
+`/4` already rejects. A separate object keeps the two promises apart: the package anchor says the set
+was not swapped; this one says the chain reached here and its last row was this.
+
+**Impact on consumers.** Additive: a new object, nothing existing changes. Consumers that do not read
+it are unaffected; those that do can distinguish "tail missing" (`current.rows < anchored.rows`),
+"tail replaced" (same length, different `lastHash`), "anchored last row changed or deleted", and
+"grown since the anchor" (not a deletion).
+
+**What this release deliberately excludes.** Only `aiAudit` and `operationAudit` are covered; the
+side-effect chain is a third chain and is out of scope. `rows` counts chained rows only, so a
+deleted legacy row with `hash IS NULL` is invisible here. Nothing after `observedAt` is covered.
+Publishing the record outside the trust domain remains the deployer's obligation; a self-held anchor
+is an empty promise.
+
+**MINOR —— 审计链尾有了自己的锚。**
+
+**改了什么**
+
+新增一个 wire 对象，没有已发布文件被重写：`audit-chain-anchor` v1 记录在 `observedAt` 这一刻，两条审计链
+各有多少已入链的行（`rows`，按 `hash IS NOT NULL` 计）、末行的 id 与 hash，以及对
+`{period, date, observedAt, chains}` 计算的 `rootDigest` —— 第三方可据此复现 SM2 签名覆盖了什么。两个链
+键都必需；`null` 表示「该时刻该链没有已入链的行」，绝不是「未知」。registry 增加新条目（49 个对象），
+`wire-schema-registry-v2.json` 由它重建。既有 schema、样例与向量一字未动。
+
+**为什么**
+
+包锚承诺的是某一日证据包 digest 的集合。不属于任何已导出证据包的链行不会在该集合里留下 digest，删掉它
+不会改变包锚看得见的任何东西 —— 而尾部删除正是这种情形。把字段加进 `evidence-anchor` 等于重写已发布
+schema，而可选字段可以被生产者省略，那正是 `/4` 已经拒绝的失效模式。独立对象把两个承诺分开：包锚说
+「集合没被换」，本对象说「链到这里、末行是它」。
+
+**对消费方的影响。** 加性：新增对象，既有内容不变。不读它的消费方不受影响；读它的消费方可以区分「尾部
+缺失」（`current.rows < anchored.rows`）、「尾部被替换」（长度相同、`lastHash` 不同）、「锚定末行被改或
+被删」，以及「锚后新增」（不是删除）。
+
+**本版刻意不含的内容。** 只覆盖 `aiAudit` 与 `operationAudit`；副作用链是第三条链，不在范围内。`rows`
+只数已入链的行，故删除一条 `hash IS NULL` 的遗留行在此不可见。`observedAt` 之后的写入不在覆盖内。把记录
+发布到信任域之外仍是部署方的义务；自持锚是空心承诺。
+
+---
+
 ## v1.21.0 — 2026-11-07
 
 **MINOR — releasing a stuck write hold is a row on the audit chain.**
