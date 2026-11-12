@@ -11,7 +11,7 @@
 
 **系列长文** —— AI 执行治理与 AI 审计证据两条线的长文：[知乎文集](https://www.zhihu.com/people/56-10-10-68)。
 
-<!-- BEGIN keelbase-family:en sha256:92e82fd34f0a15d22b119841121b79f97caa1bfb8f5d77dcdcf73002c9257be0 -->
+<!-- BEGIN keelbase-family:en sha256:a9018cd792f0bda42726d79527bdb0310a1da0e268d2b05f2fed603dab417db6 -->
 ## 🧬 The KeelBase family
 
 <p align="center">
@@ -23,7 +23,7 @@
 > owns it. Every repository here is **Apache-2.0**.
 
 ```text
-  host adapters   KeelBase-YuDao
+  host adapters   KeelBase-Vue-Pro
                   └ governance added to a mature enterprise platform (yudao)
 
   runtimes        KeelBase (TypeScript)   ·   KeelBase4J (Java / Spring)
@@ -41,13 +41,13 @@
 | [`KeelBase`](https://github.com/rain6fish/KeelBase) | Reference implementation · product documentation · demo | TypeScript · NestJS · Vue · Flutter · Taro | active |
 | [`KeelBase4J`](https://github.com/rain6fish/KeelBase4J) | The Java carrier of the same protocol | Java 17 · Spring Boot | active |
 | [`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) | Wire an existing Java/Spring system in as governed AI tools | Maven · Gradle | 0.1.x |
-| [`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) | Host adapter — the governance layer on a yudao platform | Java · Vue 3 | active |
+| [`KeelBase-Vue-Pro`](https://github.com/rain6fish/KeelBase-Vue-Pro) | Host adapter — the governance layer on a yudao platform | Java · Vue 3 | active |
 | [`keelbase-contract`](https://github.com/rain6fish/keelbase-contract) | The protocol itself — schemas, vectors, the version line | JSON Schema | v1.x |
 
 **Where to start** — see it run: [`KeelBase`](https://github.com/rain6fish/KeelBase) (60-second
 Docker) · make an existing Java system AI-capable:
 [`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) · you already run yudao:
-[`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) · implement the protocol:
+[`KeelBase-Vue-Pro`](https://github.com/rain6fish/KeelBase-Vue-Pro) · implement the protocol:
 [`keelbase-contract`](https://github.com/rain6fish/keelbase-contract).
 
 **Read the series** — the long-form essays behind these decisions, on AI execution governance and
@@ -57,7 +57,7 @@ Which contract version each runtime answers for is maintained **once**, in the m
 [Compatibility](https://github.com/rain6fish/KeelBase#-compatibility). It is not duplicated here.
 <!-- END keelbase-family:en -->
 
-<!-- BEGIN keelbase-family:zh sha256:daca345c0cc83a31d3896782831acc016c4c36655b7dd2800165a3dbe3b7f032 -->
+<!-- BEGIN keelbase-family:zh sha256:ddb20e7b71e425335b08f45a50267ef8d129c1a7944e56da83ec6a71eae6bd3c -->
 ## 🧬 KeelBase 家族
 
 <p align="center">
@@ -68,7 +68,7 @@ Which contract version each runtime answers for is maintained **once**, in the m
 > 各 runtime 与各宿主消费它，**谁也不拥有它**。这里每个仓都是 **Apache-2.0**。
 
 ```text
-  宿主适配   KeelBase-YuDao
+  宿主适配   KeelBase-Vue-Pro
              └ 在成熟企业平台上补治理层（芋道）
 
   runtime    KeelBase（TypeScript）  ·  KeelBase4J（Java / Spring）
@@ -86,13 +86,13 @@ Which contract version each runtime answers for is maintained **once**, in the m
 | [`KeelBase`](https://github.com/rain6fish/KeelBase) | 参考实现 · 产品文档 · 演示 | TypeScript · NestJS · Vue · Flutter · Taro | 活跃 |
 | [`KeelBase4J`](https://github.com/rain6fish/KeelBase4J) | 同一协议的 Java 载体 | Java 17 · Spring Boot | 活跃 |
 | [`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) | 把存量 Java/Spring 系统接成受治理的 AI 工具 | Maven · Gradle | 0.1.x |
-| [`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) | 宿主适配——芋道平台上的治理层 | Java · Vue 3 | 活跃 |
+| [`KeelBase-Vue-Pro`](https://github.com/rain6fish/KeelBase-Vue-Pro) | 宿主适配——芋道平台上的治理层 | Java · Vue 3 | 活跃 |
 | [`keelbase-contract`](https://github.com/rain6fish/keelbase-contract) | 协议本体——schema、向量、版本线 | JSON Schema | v1.x |
 
 **从哪里开始** —— 想看它跑起来：[`KeelBase`](https://github.com/rain6fish/KeelBase)（60 秒
 Docker）· 想让存量 Java 系统具备 AI 能力：
 [`KeelBase-java-starter`](https://github.com/rain6fish/KeelBase-java-starter) · 你已经在用芋道：
-[`KeelBase-YuDao`](https://github.com/rain6fish/KeelBase-YuDao) · 想实现这个协议：
+[`KeelBase-Vue-Pro`](https://github.com/rain6fish/KeelBase-Vue-Pro) · 想实现这个协议：
 [`keelbase-contract`](https://github.com/rain6fish/keelbase-contract)。
 
 **系列长文** —— 这些决定背后的长文，分「AI 执行治理」「AI 审计证据」两条线：
