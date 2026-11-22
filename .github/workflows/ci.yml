@@ -10,6 +10,17 @@
 #
 # `verify-full-profile.mjs` also has an online half that points at a running runtime and measures *its*
 # conformance — that belongs to whoever is being measured, not here.
+#
+# A second job judges the commits this event adds, not the files: the house message order is an English
+# block first and a Chinese block second, with no `Co-Authored-By` trailer. The rule lives in a
+# user-level file that no job reads, so it was enforced by whoever happened to be reviewing; the
+# checker is a vendored copy of the one in `KeelBase-Vue-Pro`, and the test asserts its digest against
+# `scripts/check-commit-order.vendor.json`. History is never scanned — the rule is not retroactive.
+#
+# 第二个 job 判的是这次事件新增的**提交**而不是文件：本仓的提交信息顺序是英文块在前、中文块在后，不带
+# `Co-Authored-By` trailer。这条规则写在一份没有任何 job 去读的用户级文件里，于是一直靠碰巧在审的人执行；
+# 检查器是 `KeelBase-Vue-Pro` 那一份的 vendored 副本，测试把它的摘要对到
+# `scripts/check-commit-order.vendor.json`。历史绝不被扫描 —— 规矩不追溯。
 name: CI
 
 on:
@@ -33,3 +44,42 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run check
+
+  commit-order:
+    name: Commit messages keep the bilingual order
+    # A brand-new main has no "commits this push added" — the rule is not retroactive.
+    # 刚创建的 main 没有「这次 push 新增的提交」—— 规矩不追溯。
+    if: >-
+      github.event_name == 'pull_request'
+      || (github.event_name == 'push'
+      && github.event.before != '0000000000000000000000000000000000000000')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # The gate resolves the base commit by name; a shallow clone would not hold it.
+          # 门禁按名字解析基线提交，浅克隆里没有它。
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+      # `origin/main` is the base it judges against, and actions/checkout creates no such ref on either
+      # event — it fetches that event's own ref only. One step points `origin/main` at the base each
+      # event names, so CI and the local invocation documented below run the same command spelling.
+      # 它判的基线是 `origin/main`，而 actions/checkout 在这两种事件上都不会创建这个引用 —— 它只拉那一次
+      # 事件自己的引用。一个 step 把 `origin/main` 指到事件给出的基线，于是 CI 与下面写明的本地调用跑的是
+      # 同一个命令写法。
+      - name: Point origin/main at the pull request's base
+        if: github.event_name == 'pull_request'
+        run: git update-ref refs/remotes/origin/main ${{ github.event.pull_request.base.sha }}
+      - name: Point origin/main at the push's previous tip
+        if: github.event_name == 'push'
+        run: git update-ref refs/remotes/origin/main ${{ github.event.before }}
+      - name: The checker agrees with itself here
+        run: node scripts/check-commit-order.mjs --self-test
+      - name: The vendored copy matches its pin, and the CLI contract holds
+        run: node --test scripts/check-commit-order.test.mjs
+      - name: Every added commit keeps the bilingual order
+        # Locally: node scripts/check-commit-order.mjs --base origin/main
+        # 本地：node scripts/check-commit-order.mjs --base origin/main
+        run: node scripts/check-commit-order.mjs --base origin/main
