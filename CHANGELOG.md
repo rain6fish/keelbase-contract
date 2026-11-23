@@ -5,6 +5,28 @@
 
 ---
 
+## Unreleased — 2026-11-23
+
+**`ai-audit-log-row` moves to v8 — an optional `releaseLookups`.**
+
+**What changed**
+
+`schemas/v8/` adds one optional property to the audit row: `releaseLookups`, a JSON string carrying the query evidence behind a `claim_release` row (`{count, items:[{at, conclusion, reason, lookedUpBy}]}`). It is chain-external like `ip`, `guestId`, `deviceId`, `outcome`, `tool` and `executionId`, and absent on rows that are not releases. `additionalProperties` stays `false`, so the key set is still closed; the property is not in `required`, so every earlier shape remains valid.
+
+**Why**
+
+A release decision could say how many times the target was asked but not what it answered, and readers had to parse the free-text `detail` to answer "did both probes say not there". Splitting the prose down to a count and moving the readings into a column makes that question answerable by machine without touching the hash payload.
+
+改了什么
+
+`schemas/v8/` 给审计行新增一个可选属性：`releaseLookups` —— `claim_release` 行背后的查询证据（JSON 字符串 `{count, items:[{at, conclusion, reason, lookedUpBy}]}`）。它与 `ip`、`guestId`、`deviceId`、`outcome`、`tool`、`executionId` 一样是链外列，非释放行为空。`additionalProperties` 仍为 `false`（键集仍封闭），该属性不进 `required`（此前的形态全部继续合法）。
+
+为什么
+
+一次释放决定此前只能说明目标被问了几次，说不清每次答了什么；要回答「两次是不是都说没执行」，读者得解析自由文本 `detail`。把散文压成一句次数、把读数移进一列之后，这个问题机器就能答，而且不碰哈希载荷。
+
+---
+
 ## Unreleased — 2026-11-08
 
 **Parked — membership v3 leaves the release line.**
