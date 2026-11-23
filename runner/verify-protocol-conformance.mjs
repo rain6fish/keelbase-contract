@@ -274,6 +274,45 @@ for (const outcomeVectorFile of OUTCOME_VECTOR_FILES) {
 /** The newest published vocabulary — what a fresh consumer should read. */
 const outcomeVectors = SPECS(OUTCOME_VECTOR_FILES[OUTCOME_VECTOR_FILES.length - 1]);
 
+/* ═══════════ `releaseLookups` 的线上形状（ai-audit-log-row v8，F-85b） ═══════════ */
+
+/**
+ * A release row may carry the query evidence behind the decision. The contract fixes only the shape of
+ * that column — a JSON **string** (or null/absent) — never its contents: what goes inside is the
+ * producer's data. These cases pin the shape, and the closed key set that survived the new property.
+ *
+ * 释放行可以带上决定背后的查询证据。契约只钉这一列在行上的**形状**——一段 JSON **文本**（或 null/省略），
+ * 不规定里面装什么：那是产出方的数据。下面几条钉形状，以及加了这一列之后仍然封闭的键集。
+ */
+const releaseEvidenceVectors = SPECS('ai-audit-log-release-evidence-v1-vector.json');
+{
+  const tag = `[${releaseEvidenceVectors.vectorVersion}] `;
+  const schema = SPECS(releaseEvidenceVectors.schema);
+  const props = Object.keys(schema.properties ?? {});
+  const required = schema.required ?? [];
+  let allOk = true;
+  for (const c of releaseEvidenceVectors.cases) {
+    const row = c.in;
+    const undeclared = Object.keys(row).filter((k) => !props.includes(k));
+    const missing = required.filter((k) => !(k in row));
+    const badType = 'releaseLookups' in row
+      && row.releaseLookups !== null
+      && typeof row.releaseLookups !== 'string';
+    const legal = undeclared.length === 0 && missing.length === 0 && !badType;
+    if (legal !== c.expect.legal) {
+      allOk = false;
+      bad(`${tag}${c.name}`, `语料自称 ${c.expect.legal}；按 v8 形状判为 ${legal}`
+        + (undeclared.length ? ` · 未声明键 ${undeclared.join(',')}` : '')
+        + (missing.length ? ` · 缺必填 ${missing.join(',')}` : '')
+        + (badType ? ' · releaseLookups 不是字符串' : ''));
+    }
+  }
+  allOk && ok(`${tag}每一条 case 与 v8 形状自洽（合法的通过、不合法的被拒）`, `${releaseEvidenceVectors.cases.length} 条`);
+  props.includes('releaseLookups')
+    ? ok(`${tag}v8 的 schema 确实声明了 releaseLookups`)
+    : bad(`${tag}v8 的 schema 没有声明 releaseLookups`);
+}
+
 /* ═══════════ 报告 ═══════════ */
 
 const passCount = results.filter((r) => r.pass).length;
