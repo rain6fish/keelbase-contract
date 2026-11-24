@@ -5,9 +5,9 @@
 
 ---
 
-## Unreleased — 2026-11-23
+## v1.23.0 — 2026-11-24
 
-**`ai-audit-log-row` moves to v8 — an optional `releaseLookups`.**
+**MINOR — `ai-audit-log-row` moves to v8 with an optional `releaseLookups`.**
 
 **What changed**
 
