@@ -49,6 +49,10 @@ the vectors, not the paperwork around them.
    Chinese block.
 4. `git tag -a vX.Y.Z -m "<message>"`.
 5. Push the branch and the tag.
+6. There is no Release-page step. This repository's releases are its annotated tags: a version
+   exists when its tag does. A missing GitHub or Gitee Release page means no page was created —
+   not that the version was unpublished. Judge a version by its tag and its CHANGELOG entry,
+   never by the presence of a page.
 
 ## What the consumers do next
 
