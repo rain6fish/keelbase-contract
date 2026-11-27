@@ -5,6 +5,28 @@
 
 ---
 
+## v1.24.0 — 2026-11-27
+
+**MINOR — `evidence-package` moves to v7: the reading-kind sections are signed.**
+
+**What changed**
+
+`schemas/v7/` adds two format versions to the evidence package. `keelbase-audit-evidence/5` is the `/2` shape plus a required `releaseReadings` array — one entry per `claim_release` row in the chain, carrying the copied `releaseLookups` readings behind that decision. `keelbase-audit-evidence/6` is the `/4` shape plus a required `targetStatusReadings` array — the recorded target-status asks for the action's write key. Both new sections are inside the package canonical, so a flipped reading kind breaks the signature. The format namespace is shared with the evidence root, where `/3` and `/4` were already taken; that is why the package is `/5` and the evidence root `/6` rather than `/3` and `/5`. The `/1`–`/4` branches are unchanged and remain valid.
+
+**Why**
+
+The reading kind (`current_state` versus `receipt`) decides whether a weak reading may release a write hold. Carrying it in the exported package as an unsigned copy made it visible but not attested: an attacker could flip the kind without breaking the signature. Moving the copy into the canonical makes the distinction evidence-grade while leaving its source — the off-chain `releaseLookups` column / `ai_target_status_lookups` table — exactly where it was.
+
+改了什么
+
+`schemas/v7/` 给证据包新增两个格式版本。`keelbase-audit-evidence/5` 是 `/2` 形状加一个必填的 `releaseReadings` 数组 —— 链上每条 `claim_release` 行一条，携带该决定背后的 `releaseLookups` 读数拷贝。`keelbase-audit-evidence/6` 是 `/4` 形状加一个必填的 `targetStatusReadings` 数组 —— 该动作写键上已记录的目标状态询问。两个新段都在证据包 canonical 里，故改一个读数种类会破签。格式号与证据根共用，而 `/3` `/4` 已被占用；故包是 `/5`、证据根是 `/6`，而不是 `/3` 与 `/5`。`/1`–`/4` 分支不变，仍然合法。
+
+为什么
+
+读数种类（`current_state` 对 `receipt`）决定弱读数能否释放写占位。把它作为未入签的拷贝带进导出包，只是「看得见」而不是「被背书」：攻击者可以改掉种类而不破签。把这份拷贝移进 canonical，这个区分才成为可举证的事实，而它的来源 —— 链外 `releaseLookups` 列 / `ai_target_status_lookups` 表 —— 原样不动。
+
+---
+
 ## v1.23.0 — 2026-11-24
 
 **MINOR — `ai-audit-log-row` moves to v8 with an optional `releaseLookups`.**
