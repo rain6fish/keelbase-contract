@@ -44,6 +44,11 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run check
+      # The tag-lineage gate only runs on a tag push, where a mistake costs a published tag. Its own
+      # contract is exercised here, on every push, against throwaway repositories.
+      # tag 血统闸只在推 tag 时运行，而在那里出错要付一个已发布 tag 的代价。它自己的契约在这里、每次推送
+      # 都用临时仓跑一遍。
+      - run: node --test scripts/check-tag-lineage.test.mjs
 
   commit-order:
     name: Commit messages keep the bilingual order
